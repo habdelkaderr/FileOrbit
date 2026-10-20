@@ -42,17 +42,23 @@ jobs:
       - name: Test
         shell: pwsh
         run: |
-          $output = dotnet test --no-build -c Release -- --filter-not-trait "Category=Office" 2>&1
-          $output | Write-Host
-          if ($LASTEXITCODE -ne 0) {
-            # Surface failing tests (name + first message line) as annotations on the run summary.
-            $lines = @($output | ForEach-Object { "$_" -replace "`e\[[0-9;]*m", "" })
-            for ($i = 0; $i -lt $lines.Count; $i++) {
-              if ($lines[$i] -match '^\s*failed ') { Write-Host "::error::$($lines[$i].Trim()) -- $(($lines[($i+1)..($i+3)] -join ' ').Trim())" }
+          # Each test group runs in its own process, so a crash at process exit is attributed to its group.
+          $failed = @()
+          foreach ($group in 'FileOrbit.Tests.Unit', 'FileOrbit.Tests.Integration', 'FileOrbit.Tests.Visual') {
+            $output = dotnet test --no-build -c Release -- --filter-not-trait "Category=Office" --filter-namespace $group 2>&1
+            $code = $LASTEXITCODE
+            $output | Write-Host
+            if ($code -ne 0) {
+              $failed += $group
+              $lines = @($output | ForEach-Object { "$_" -replace "`e\[[0-9;]*m", "" })
+              for ($i = 0; $i -lt $lines.Count; $i++) {
+                if ($lines[$i] -match '^\s*failed ') { Write-Host "::error::[$group] $($lines[$i].Trim()) -- $(($lines[($i+1)..($i+3)] -join ' ').Trim())" }
+              }
+              $summary = ($lines | Where-Object { $_ -match 'total:|succeeded:|failed:|exit code' }) -join ' / '
+              Write-Host "::error::[$group] exit code $code. $summary"
             }
-            $lines | Select-Object -Last 12 | Where-Object { $_.Trim() } | ForEach-Object { Write-Host "::error::$($_.Trim())" }
-            exit 1
           }
+          if ($failed.Count -gt 0) { exit 1 }
 
       # If the test host crashed, report which module faulted (from Windows Error Reporting) as annotations.
       - name: Crash diagnostics
