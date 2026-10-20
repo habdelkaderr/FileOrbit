@@ -50,7 +50,8 @@ public sealed record DependencyInfo(
     string License,
     string Website,
     string? WingetId = null,
-    string? InstallNotes = null);
+    string? InstallNotes = null,
+    IReadOnlyList<string>? InstallSteps = null);
 
 public sealed record EngineStatus(bool IsAvailable, string Summary, string? Version = null, string? Location = null)
 {

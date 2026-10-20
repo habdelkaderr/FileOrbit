@@ -29,8 +29,14 @@ public sealed class GhostscriptEngine : ConversionEngineBase
         "PDF optimisation (smaller files) and PDF/A archival conversion",
         "GNU AGPL 3.0 (or commercial licence from Artifex)",
         "https://ghostscript.com/releases/gsdnld.html",
-        // Ghostscript is not in the winget catalog, so the Engines page links to the official download instead.
-        InstallNotes: "Download the 64-bit Windows installer (AGPL release) from the Ghostscript website, run it, then click “Check again”.");
+        // Ghostscript is not in the winget catalog, so the Engines page guides a manual download instead.
+        InstallSteps:
+        [
+            "Click “Download Ghostscript”. Your browser opens the official Ghostscript download page.",
+            "Under “Ghostscript AGPL Release”, download the installer for Windows (64 bit).",
+            "Run the downloaded file and keep the default options.",
+            "Come back here and click “Check again”. PDFs then get Optimize and PDF/A in the FileOrbit menu.",
+        ]);
 
     public TimeSpan Timeout { get; init; } = TimeSpan.FromMinutes(15);
 

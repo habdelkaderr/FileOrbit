@@ -13,6 +13,9 @@
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <!-- FileOrbit ships for 64-bit Windows; listing it keeps lock files stable for builds and publishes. -->
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <!-- The portable build is a single-file exe. Analysing for it in every build also keeps normal builds and
+         publishes on the same dependency set, so packages.lock.json is identical locally and in CI. -->
+    <EnableSingleFileAnalyzer>true</EnableSingleFileAnalyzer>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <WindowsTargetFramework>net10.0-windows10.0.19041.0</WindowsTargetFramework>
   </PropertyGroup>

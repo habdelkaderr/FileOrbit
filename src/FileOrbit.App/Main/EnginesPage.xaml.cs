@@ -27,7 +27,21 @@ public sealed class EngineRow
             engine.Dependency is null ? null : $"Licence: {engine.Dependency.License}",
             engine.Dependency?.InstallNotes,
         }.Where(s => s is not null));
+        if (!IsAvailable && engine.Dependency?.InstallSteps is { Count: > 0 } steps)
+        {
+            SetupSteps = string.Join(Environment.NewLine, steps.Select((step, i) => $"{i + 1}.  {step}"));
+        }
     }
+
+    /// <summary>Numbered setup instructions, shown only while the engine is missing.</summary>
+    public string? SetupSteps { get; }
+
+    public bool HasSetupSteps => SetupSteps is not null;
+
+    /// <summary>A prominent download button for missing engines that winget cannot install.</summary>
+    public bool CanDownload => !IsAvailable && Engine.Dependency?.WingetId is null && Engine.Dependency?.Website is not null;
+
+    public string DownloadLabel => $"Download {Engine.Dependency?.Name}";
 
     public IConversionEngine Engine { get; }
 
@@ -51,7 +65,7 @@ public sealed class EngineRow
 
     public bool CanLocate => Engine.Id is "7zip" or "ffmpeg" or "libreoffice" or "ghostscript";
 
-    public bool HasWebsite => Engine.Dependency?.Website is not null;
+    public bool HasWebsite => Engine.Dependency?.Website is not null && !CanDownload;
 }
 
 public partial class EnginesPage : UserControl
