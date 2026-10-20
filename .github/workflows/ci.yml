@@ -46,9 +46,9 @@ jobs:
           $output | Write-Host
           if ($LASTEXITCODE -ne 0) {
             # Surface failing tests (name + first message line) as annotations on the run summary.
-            $lines = @($output | ForEach-Object { "$_" })
+            $lines = @($output | ForEach-Object { "$_" -replace "\[[0-9;]*m", "" })
             for ($i = 0; $i -lt $lines.Count; $i++) {
-              if ($lines[$i] -match '^failed ') { Write-Host "::error::$($lines[$i].Trim()) -- $(($lines[($i+1)..($i+3)] -join ' ').Trim())" }
+              if ($lines[$i] -match '^\s*failed ') { Write-Host "::error::$($lines[$i].Trim()) -- $(($lines[($i+1)..($i+3)] -join ' ').Trim())" }
             }
             $lines | Select-Object -Last 12 | Where-Object { $_.Trim() } | ForEach-Object { Write-Host "::error::$($_.Trim())" }
             exit 1
