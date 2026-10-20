@@ -45,7 +45,8 @@ public static class EnginePlugins
             }
             catch (Exception ex) when (ex is BadImageFormatException or FileLoadException or ReflectionTypeLoadException or TargetInvocationException or MissingMethodException or TypeLoadException)
             {
-                problems.Add(new PluginProblem(name, $"The engine plugin could not be loaded: {ex.Message}"));
+                var cause = ex is TargetInvocationException { InnerException: { } inner } ? inner : ex;
+                problems.Add(new PluginProblem(name, $"The engine plugin could not be loaded ({cause.GetType().Name}): {cause.Message}"));
             }
         }
 

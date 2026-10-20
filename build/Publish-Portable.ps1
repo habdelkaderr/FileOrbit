@@ -24,6 +24,13 @@ dotnet publish $project -c $Configuration -r win-x64 --self-contained true `
     -p:DebugType=none -p:DebugSymbols=false -o $output
 if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed ($LASTEXITCODE)" }
 
+# Packaging guard: the engine plugin must come from this same build.
+$appVersion = (Get-Item (Join-Path $output 'FileOrbit.exe')).VersionInfo.FileVersion
+$plugin = Join-Path $output 'FileOrbit.Engines.Ghostscript.dll'
+if (-not (Test-Path $plugin)) { throw 'Engine plugin missing from the portable folder.' }
+$pluginVersion = (Get-Item $plugin).VersionInfo.FileVersion
+if ($pluginVersion -ne $appVersion) { throw "Engine plugin version $pluginVersion does not match FileOrbit $appVersion (stale build output)." }
+
 Copy-Item (Join-Path $root 'README.md'), (Join-Path $root 'THIRD-PARTY-NOTICES.md') $output -Force
 Set-Content -Path (Join-Path $output 'START HERE.txt') -Encoding utf8 -Value @"
 FileOrbit $version - portable

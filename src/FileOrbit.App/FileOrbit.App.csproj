@@ -21,16 +21,19 @@
     <InternalsVisibleTo Include="FileOrbit.Tests" />
   </ItemGroup>
   <Target Name="CopyEnginePlugins" AfterTargets="Build">
-    <ItemGroup>
-      <EnginePlugin Include="..\FileOrbit.Engines.Ghostscript\bin\$(Configuration)\$(TargetFramework)\FileOrbit.Engines.Ghostscript.dll" />
-    </ItemGroup>
-    <Copy SourceFiles="@(EnginePlugin)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" Condition="Exists('%(EnginePlugin.Identity)')" />
+    <!-- The plugin is built with the same configuration and runtime as the app; copy that exact build. -->
+    <PropertyGroup>
+      <EnginePluginDir>$(MSBuildThisFileDirectory)../FileOrbit.Engines.Ghostscript/bin/$(Configuration)/$(TargetFramework)/</EnginePluginDir>
+      <EnginePluginDir Condition="'$(RuntimeIdentifier)' != ''">$(EnginePluginDir)$(RuntimeIdentifier)/</EnginePluginDir>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(EnginePluginDir)FileOrbit.Engines.Ghostscript.dll')" Text="Engine plugin not found at $(EnginePluginDir)" />
+    <Copy SourceFiles="$(EnginePluginDir)FileOrbit.Engines.Ghostscript.dll" DestinationFolder="$(OutDir)" />
   </Target>
   <!-- Keep the published app lean: no native debug symbols (SkiaSharp ships ~110 MB of them), and
        ReadyToRun only where it helps start-up, not for large, rarely-used libraries. -->
   <Target Name="ExcludeSymbolsFromPublish" AfterTargets="ComputeResolvedFilesToPublishList">
     <ItemGroup>
-      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(Extension)' == '.pdb'" />
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(Extension)' == '.pdb' or '%(Extension)' == '.lib'" />
     </ItemGroup>
   </Target>
   <ItemGroup>
