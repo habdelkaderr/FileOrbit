@@ -29,9 +29,11 @@ Requires 64-bit Windows 10 (version 2004 or later) or Windows 11. No .NET or oth
 - **Check the download is genuine.** Each file has a matching `.sha256` with its fingerprint. Compare it
   with the output of `Get-FileHash <file> -Algorithm SHA256` in PowerShell. Releases are built by GitHub
   from this repository's source (see [SECURITY.md](SECURITY.md)).
-- **Expect a Windows warning.** FileOrbit is not code-signed yet, so Windows may show *"Windows
-  protected your PC"*. Choose **More info → Run anyway**. On PCs with Smart App Control turned on,
-  unsigned apps can be blocked entirely until releases are signed.
+- **Code signing.** Releases are being set up for free code signing provided by
+  [SignPath.io](https://about.signpath.io), with a certificate by the
+  [SignPath Foundation](https://signpath.org) (see [Code signing policy](#code-signing-policy)). Until a
+  release is signed, Windows may show *"Windows protected your PC"* (choose **More info → Run
+  anyway**), and PCs with Smart App Control turned on block the unsigned app entirely.
 
 **Sharing on a USB drive:** copy the `FileOrbit-USB` folder (made by `build/Make-UsbFolder.ps1`)
 to the drive. On another PC, run the setup `.msi` from the drive, or run `FileOrbit.exe` directly: it
@@ -46,7 +48,9 @@ offers to install itself on that PC, so it keeps working after the drive is remo
 - [Development](#development)
 - [Architecture](#architecture)
 - [Security and privacy](#security-and-privacy)
+- [Code signing policy](#code-signing-policy)
 - [Troubleshooting](#troubleshooting)
+- [License](#license)
 
 ## Using FileOrbit
 
@@ -343,6 +347,23 @@ build/                 Publish and installer scripts
 - **History and logs** stay on the PC (`%LocalAppData%\FileOrbit`). Both can be cleared in Settings,
   and history can be turned off. Logs contain file paths but never file contents.
 
+## Code signing policy
+
+Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by
+[SignPath Foundation](https://signpath.org).
+
+- **Committers and reviewers:** [Hatem Abdelkader](https://github.com/habdelkaderr)
+- **Approvers:** [Hatem Abdelkader](https://github.com/habdelkaderr)
+
+Only release builds produced by this repository's GitHub Actions workflow from tagged source are
+signed. Every signing request is approved manually by an approver.
+
+**Privacy policy:** This program will not transfer any information to other networked systems unless
+specifically requested by the user or the person installing or operating it, with one exception: the
+daily update check, which asks `api.github.com` for the latest release number of this repository and
+sends nothing about you or your files. It can be turned off in *Settings → Updates*. See
+[Security and privacy](#security-and-privacy).
+
 ## Troubleshooting
 
 | Problem | Fix |
@@ -355,3 +376,8 @@ build/                 Publish and installer scripts
 | An Office conversion takes very long | FileOrbit stops Office after 10 minutes (1 hour for video) and reports it. Large PDFs in Word PDF Reflow can be slow. |
 | How do I update? | FileOrbit tells you when a new version is out (notification and a banner on Home). Click it to open the release page, download the `.msi` and run it; it replaces the old version and keeps your settings. *Settings → Updates → Check for updates* checks right away. |
 | A conversion failed | Open *Technical details* on the card or the Queue page. Logs are in `%LocalAppData%\FileOrbit\logs` (*Settings → Open log folder*). |
+
+## License
+
+FileOrbit is released under the [MIT License](LICENSE). Bundled third-party components keep their own
+licences; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
