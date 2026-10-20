@@ -1,0 +1,77 @@
+<Window x:Class="FileOrbit.App.Radial.RadialMenuWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="FileOrbit"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Topmost="True"
+        ShowActivated="True"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        FontFamily="Segoe UI Variable Text, Segoe UI"
+        TextOptions.TextFormattingMode="Display">
+    <Window.Resources>
+        <Style x:Key="HubButtonStyle" TargetType="Button">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Cursor" Value="Arrow" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Ellipse x:Name="HubShape" Fill="{DynamicResource OrbitHubBrush}" Stroke="{DynamicResource OrbitHubStrokeBrush}" StrokeThickness="1" />
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="HubShape" Property="Stroke" Value="{DynamicResource OrbitAccentBrush}" />
+                                <Setter TargetName="HubShape" Property="StrokeThickness" Value="2" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid x:Name="Root" RenderTransformOrigin="0.5,0.5" Opacity="0">
+        <Grid.RenderTransform>
+            <ScaleTransform x:Name="RootScale" ScaleX="0.86" ScaleY="0.86" />
+        </Grid.RenderTransform>
+
+        <Ellipse x:Name="Disc" Fill="{DynamicResource OrbitDiscBrush}" Stroke="{DynamicResource OrbitDiscStrokeBrush}" StrokeThickness="1">
+            <Ellipse.Effect>
+                <DropShadowEffect BlurRadius="28" ShadowDepth="6" Direction="270" Opacity="0.38" Color="{DynamicResource OrbitShadowColor}" RenderingBias="Performance" />
+            </Ellipse.Effect>
+        </Ellipse>
+
+        <Canvas x:Name="Ring" RenderTransformOrigin="0.5,0.5">
+            <Canvas.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform x:Name="RingScale" />
+                    <RotateTransform x:Name="RingRotate" />
+                </TransformGroup>
+            </Canvas.RenderTransform>
+        </Canvas>
+
+        <Button x:Name="Hub" Style="{StaticResource HubButtonStyle}" Click="OnHubClick"
+                AutomationProperties.Name="Selected file">
+            <StackPanel Width="132" HorizontalAlignment="Center">
+                <TextBlock x:Name="HubBackGlyph" Text="&#xE72B;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="14"
+                           Foreground="{DynamicResource OrbitAccentBrush}" HorizontalAlignment="Center" Margin="0,0,0,2" Visibility="Collapsed" />
+                <Grid Width="52" Height="52" HorizontalAlignment="Center">
+                    <Image x:Name="HubImage" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" />
+                    <TextBlock x:Name="HubGlyph" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="30"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource OrbitSubtleTextBrush}" />
+                </Grid>
+                <TextBlock x:Name="HubTitle" Foreground="{DynamicResource OrbitTextBrush}" FontSize="12.5" FontWeight="SemiBold"
+                           TextAlignment="Center" TextWrapping="Wrap" MaxHeight="34" TextTrimming="CharacterEllipsis" Margin="0,5,0,0" />
+                <Border x:Name="HubBadge" Background="{DynamicResource OrbitBadgeBrush}" CornerRadius="4" Padding="6,1" Margin="0,4,0,0" HorizontalAlignment="Center">
+                    <TextBlock x:Name="HubSubtitle" Foreground="{DynamicResource OrbitSubtleTextBrush}" FontSize="10.5" TextTrimming="CharacterEllipsis" />
+                </Border>
+            </StackPanel>
+        </Button>
+    </Grid>
+</Window>

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Optional engine plugin. Loaded at runtime by EnginePlugins; nothing references its types directly,
+       so the app keeps working if this assembly is missing or blocked by Windows Application Control. -->
+  <PropertyGroup>
+    <TargetFramework>$(WindowsTargetFramework)</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <RootNamespace>FileOrbit.Engines.Ghostscript</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FileOrbit.Engines\FileOrbit.Engines.csproj" Private="false" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,133 @@
+<UserControl x:Class="FileOrbit.App.Main.SettingsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style x:Key="Row" TargetType="Grid">
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,24,24">
+        <StackPanel MaxWidth="760" HorizontalAlignment="Left">
+            <TextBlock Text="Settings" Style="{StaticResource PageTitle}" />
+            <TextBlock Style="{StaticResource PageSubtitle}" Text="Changes are saved immediately." />
+
+            <!-- Appearance -->
+            <TextBlock Text="Appearance" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}">
+                <Grid Style="{StaticResource Row}" Margin="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="220" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Theme" VerticalAlignment="Center" />
+                    <ComboBox x:Name="ThemeBox" Grid.Column="1" SelectionChanged="OnThemeChanged" AutomationProperties.Name="Theme" />
+                </Grid>
+            </Border>
+
+            <!-- Windows integration -->
+            <TextBlock Text="Windows integration" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <CheckBox x:Name="ExplorerBox" Content="Show “Convert with FileOrbit” when right-clicking files and folders" Click="OnExplorerChanged" />
+                    <TextBlock Style="{StaticResource Subtle}" Margin="26,2,0,12"
+                               Text="Added for your account only. On Windows 11 the entry is under “Show more options” (Shift+F10)." />
+                    <CheckBox x:Name="HotkeyEnabledBox" Content="Global keyboard shortcut" Click="OnHotkeyEnabledChanged" />
+                    <Grid Margin="26,6,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="220" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="HotkeyBox" IsReadOnly="True" PreviewKeyDown="OnHotkeyKeyDown" AutomationProperties.Name="Shortcut"
+                                 ToolTip="Click here and press the new shortcut" />
+                        <TextBlock Grid.Column="1" Style="{StaticResource Subtle}" Margin="10,0,0,0" VerticalAlignment="Center" Text="Click the box and press a new combination." />
+                    </Grid>
+                    <TextBlock x:Name="HotkeyError" Margin="26,4,0,0" Foreground="{DynamicResource OrbitErrorBrush}" TextWrapping="Wrap" />
+                    <TextBlock Style="{StaticResource Subtle}" Margin="26,2,0,12"
+                               Text="Select files in File Explorer (or on the desktop) and press the shortcut to open the menu. Without a selection it asks for a file." />
+                    <CheckBox x:Name="TrayBox" Content="Keep running in the notification area (faster menu, enables the shortcut)" Click="OnTrayChanged" />
+                    <CheckBox x:Name="StartupBox" Content="Start FileOrbit when I sign in to Windows" Margin="0,10,0,0" Click="OnStartupChanged" />
+                    <CheckBox x:Name="NotifyBox" Content="Show a notification when a background conversion finishes" Margin="0,10,0,0" Click="OnSimpleChanged" />
+                </StackPanel>
+            </Border>
+
+            <!-- Conversions -->
+            <TextBlock Text="Conversions" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <Grid Style="{StaticResource Row}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="220" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Save converted files" VerticalAlignment="Center" />
+                        <ComboBox x:Name="OutputModeBox" Grid.Column="1" SelectionChanged="OnOutputModeChanged" AutomationProperties.Name="Default output folder" />
+                    </Grid>
+                    <Grid x:Name="FixedFolderRow" Style="{StaticResource Row}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="220" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Folder" VerticalAlignment="Center" />
+                        <TextBox x:Name="FixedFolderBox" Grid.Column="1" IsReadOnly="True" AutomationProperties.Name="Fixed output folder" />
+                        <Button Grid.Column="2" Content="Choose…" Margin="8,0,0,0" Click="OnChooseFixedFolder" />
+                    </Grid>
+                    <Grid Style="{StaticResource Row}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="220" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="If the output already exists" VerticalAlignment="Center" />
+                        <ComboBox x:Name="CollisionBox" Grid.Column="1" SelectionChanged="OnCollisionChanged" AutomationProperties.Name="Default collision handling" />
+                    </Grid>
+                    <Grid Style="{StaticResource Row}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="220" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Simultaneous conversions" VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <ComboBox x:Name="ConcurrencyBox" Width="80" SelectionChanged="OnConcurrencyChanged" AutomationProperties.Name="Simultaneous conversions" />
+                            <TextBlock Style="{StaticResource Subtle}" Margin="10,0,0,0" VerticalAlignment="Center" Text="Takes effect after FileOrbit restarts." />
+                        </StackPanel>
+                    </Grid>
+                    <CheckBox x:Name="StartImmediatelyBox" Content="Start immediately when a conversion has no settings to choose" Click="OnSimpleChanged" />
+                    <CheckBox x:Name="ShowUnavailableBox" Content="Show conversions that need missing software (dimmed) in the menu" Margin="0,10,0,0" Click="OnSimpleChanged" />
+                    <Button Content="Reset pinned formats and remembered settings" HorizontalAlignment="Left" Margin="0,14,0,0" Click="OnResetPreferences" />
+                </StackPanel>
+            </Border>
+
+            <!-- Privacy -->
+            <TextBlock Text="Privacy and data" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xEA18;" Style="{StaticResource Glyph}" FontSize="16" Foreground="{DynamicResource OrbitSuccessBrush}" VerticalAlignment="Center" />
+                        <TextBlock Text="All conversions run on this PC." FontWeight="SemiBold" Margin="10,0,0,0" />
+                    </StackPanel>
+                    <TextBlock Style="{StaticResource Subtle}" Margin="26,2,0,12"
+                               Text="FileOrbit never uploads files, has no online conversion services, and collects no telemetry or analytics. Passwords you enter are used once and never saved." />
+                    <CheckBox x:Name="HistoryBox" Content="Keep a history of conversions (file paths, stored on this PC)" Click="OnSimpleChanged" />
+                    <WrapPanel Margin="0,12,0,0">
+                        <Button Content="Clear history" Click="OnClearHistory" Margin="0,0,8,8" />
+                        <Button Content="Open log folder" Click="OnOpenLogs" Margin="0,0,8,8" />
+                        <Button Content="Delete logs" Click="OnClearLogs" Margin="0,0,8,8" />
+                        <Button Content="Open data folder" Click="OnOpenData" Margin="0,0,8,8" />
+                    </WrapPanel>
+                    <TextBlock x:Name="DataFolderText" Style="{StaticResource Subtle}" />
+                </StackPanel>
+            </Border>
+
+            <!-- About -->
+            <TextBlock Text="About" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock x:Name="VersionText" FontWeight="SemiBold" />
+                    <TextBlock Style="{StaticResource Subtle}" Margin="0,4,0,8"
+                               Text="FileOrbit uses open-source components (PdfPig, ClosedXML, Open XML SDK, Markdig, SkiaSharp, Svg.Skia) and optional external programs you install yourself." />
+                    <Button Content="Third-party notices" HorizontalAlignment="Left" Click="OnNotices" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

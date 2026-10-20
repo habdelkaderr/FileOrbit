@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FileOrbit.App/FileOrbit.App.csproj" />
+    <Project Path="src/FileOrbit.Core/FileOrbit.Core.csproj" />
+    <Project Path="src/FileOrbit.Engines.Ghostscript/FileOrbit.Engines.Ghostscript.csproj" />
+    <Project Path="src/FileOrbit.Engines/FileOrbit.Engines.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/FileOrbit.Tests/FileOrbit.Tests.csproj" />
+  </Folder>
+</Solution>

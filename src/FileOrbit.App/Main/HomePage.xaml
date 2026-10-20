@@ -1,0 +1,78 @@
+<UserControl x:Class="FileOrbit.App.Main.HomePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,24,24">
+        <StackPanel MaxWidth="820" HorizontalAlignment="Left">
+            <TextBlock Text="Convert files where they are" Style="{StaticResource PageTitle}" />
+            <TextBlock Style="{StaticResource PageSubtitle}"
+                       Text="Pick a file and FileOrbit shows every conversion it can really perform, in a ring around the file. Everything runs on this PC." />
+
+            <Border CornerRadius="10" BorderThickness="2" BorderBrush="{DynamicResource OrbitSeparatorBrush}" Padding="24"
+                    Background="{DynamicResource OrbitBadgeBrush}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="&#xE898;" Style="{StaticResource Glyph}" FontSize="36" VerticalAlignment="Center" Foreground="{DynamicResource OrbitAccentBrush}" />
+                    <StackPanel Grid.Column="1" Margin="20,0" VerticalAlignment="Center">
+                        <TextBlock Text="Drop files or folders anywhere on this window" FontSize="15" FontWeight="SemiBold" />
+                        <TextBlock Style="{StaticResource Subtle}" Text="Or choose files to open the radial menu." Margin="0,2,0,0" />
+                    </StackPanel>
+                    <Button Grid.Column="2" Content="Choose files…" Click="OnBrowse" Style="{DynamicResource AccentButtonStyle}" MinWidth="120" />
+                </Grid>
+            </Border>
+
+            <TextBlock Text="Other ways to start" Style="{StaticResource SectionTitle}" />
+            <UniformGrid Columns="2">
+                <Border Style="{StaticResource Card}" Margin="0,0,6,8">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE8DE;" Style="{StaticResource Glyph}" FontSize="16" VerticalAlignment="Center" />
+                            <TextBlock Text="Right-click in File Explorer" FontWeight="SemiBold" Margin="10,0,0,0" />
+                        </StackPanel>
+                        <TextBlock x:Name="ContextMenuStatus" Style="{StaticResource Subtle}" Margin="26,4,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Margin="6,0,0,8">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE765;" Style="{StaticResource Glyph}" FontSize="16" VerticalAlignment="Center" />
+                            <TextBlock Text="Keyboard shortcut" FontWeight="SemiBold" Margin="10,0,0,0" />
+                        </StackPanel>
+                        <TextBlock x:Name="HotkeyStatus" Style="{StaticResource Subtle}" Margin="26,4,0,0" />
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+
+            <DockPanel Margin="0,18,0,8">
+                <Button DockPanel.Dock="Right" Content="View all" Click="OnViewHistory" />
+                <TextBlock Text="Recent conversions" Style="{StaticResource SectionTitle}" Margin="0" VerticalAlignment="Center" />
+            </DockPanel>
+            <TextBlock x:Name="EmptyRecent" Style="{StaticResource Subtle}" Text="Converted files will appear here." />
+            <ItemsControl x:Name="RecentList">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource Card}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Detail}" Style="{StaticResource Subtle}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button Content="Show" Click="OnShowRecent" Tag="{Binding}" Margin="6,0,0,0" ToolTip="Show in folder" />
+                                    <Button Content="Convert again" Click="OnAgainRecent" Tag="{Binding}" Margin="6,0,0,0" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

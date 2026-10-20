@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>$(WindowsTargetFramework)</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <RootNamespace>FileOrbit.App</RootNamespace>
+    <AssemblyName>FileOrbit</AssemblyName>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\FileOrbit.ico</ApplicationIcon>
+    <StartupObject>FileOrbit.App.Program</StartupObject>
+    <NoWarn>$(NoWarn);WPF0001;WFO0003</NoWarn>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FileOrbit.Core\FileOrbit.Core.csproj" />
+    <ProjectReference Include="..\FileOrbit.Engines\FileOrbit.Engines.csproj" />
+    <!-- Optional plugin: copied next to FileOrbit.exe and discovered at runtime, never referenced directly. -->
+    <ProjectReference Include="..\FileOrbit.Engines.Ghostscript\FileOrbit.Engines.Ghostscript.csproj" ReferenceOutputAssembly="false" Private="true" />
+    <InternalsVisibleTo Include="FileOrbit.Tests" />
+  </ItemGroup>
+  <Target Name="CopyEnginePlugins" AfterTargets="Build">
+    <ItemGroup>
+      <EnginePlugin Include="..\FileOrbit.Engines.Ghostscript\bin\$(Configuration)\$(TargetFramework)\FileOrbit.Engines.Ghostscript.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(EnginePlugin)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" Condition="Exists('%(EnginePlugin.Identity)')" />
+  </Target>
+  <!-- Keep the published app lean: no native debug symbols (SkiaSharp ships ~110 MB of them), and
+       ReadyToRun only where it helps start-up, not for large, rarely-used libraries. -->
+  <Target Name="ExcludeSymbolsFromPublish" AfterTargets="ComputeResolvedFilesToPublishList">
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(Extension)' == '.pdb'" />
+    </ItemGroup>
+  </Target>
+  <ItemGroup>
+    <PublishReadyToRunExclude Include="Microsoft.Windows.SDK.NET.dll;DocumentFormat.OpenXml.dll;DocumentFormat.OpenXml.Framework.dll;ClosedXML.dll;UglyToad.PdfPig.dll;System.Windows.Forms.Design.dll;Markdig.dll" />
+  </ItemGroup>
+  <Target Name="PublishEnginePlugins" AfterTargets="Publish">
+    <Copy SourceFiles="$(OutDir)FileOrbit.Engines.Ghostscript.dll" DestinationFolder="$(PublishDir)" Condition="Exists('$(OutDir)FileOrbit.Engines.Ghostscript.dll')" />
+  </Target>
+  <ItemGroup>
+    <!-- Program.Main handles single-instance forwarding before WPF starts, so App.xaml must not generate Main. -->
+    <ApplicationDefinition Remove="App.xaml" />
+    <Page Include="App.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\THIRD-PARTY-NOTICES.md" Link="THIRD-PARTY-NOTICES.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\FileOrbit.ico" />
+    <Resource Include="Assets\FileOrbit.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- WinForms is used only for the notification-area icon; keep its types out of the global namespace. -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+</Project>

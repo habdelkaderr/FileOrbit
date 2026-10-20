@@ -1,0 +1,31 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="OrbitDiscBrush" Color="#F2FBFBFD" />
+    <SolidColorBrush x:Key="OrbitDiscStrokeBrush" Color="#1F000000" />
+    <SolidColorBrush x:Key="OrbitHubBrush" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="OrbitHubStrokeBrush" Color="#1A000000" />
+    <SolidColorBrush x:Key="OrbitSegmentBrush" Color="#00000000" />
+    <SolidColorBrush x:Key="OrbitSegmentHoverBrush" Color="#0F000000" />
+    <SolidColorBrush x:Key="OrbitSeparatorBrush" Color="#14000000" />
+    <SolidColorBrush x:Key="OrbitTextBrush" Color="#FF1B1B1F" />
+    <SolidColorBrush x:Key="OrbitSubtleTextBrush" Color="#FF5F6068" />
+    <SolidColorBrush x:Key="OrbitBadgeBrush" Color="#14000000" />
+    <SolidColorBrush x:Key="OrbitWarningBrush" Color="#FF9A6700" />
+    <SolidColorBrush x:Key="OrbitErrorBrush" Color="#FFC42B1C" />
+    <SolidColorBrush x:Key="OrbitSuccessBrush" Color="#FF0F7B0F" />
+    <SolidColorBrush x:Key="OrbitAccentBrush" Color="#FF2F5BEA" />
+    <SolidColorBrush x:Key="OrbitAccentStrongBrush" Color="#FF2F5BEA" />
+    <SolidColorBrush x:Key="OrbitAccentSoftBrush" Color="#2A2F5BEA" />
+    <SolidColorBrush x:Key="OrbitAccentPressedBrush" Color="#442F5BEA" />
+    <Color x:Key="OrbitShadowColor">#FF3A3A50</Color>
+
+    <SolidColorBrush x:Key="CategoryDocumentBrush" Color="#FF1A63D6" />
+    <SolidColorBrush x:Key="CategorySpreadsheetBrush" Color="#FF16803C" />
+    <SolidColorBrush x:Key="CategoryPresentationBrush" Color="#FFC2510E" />
+    <SolidColorBrush x:Key="CategoryImageBrush" Color="#FF8430CE" />
+    <SolidColorBrush x:Key="CategoryAudioBrush" Color="#FFC5221F" />
+    <SolidColorBrush x:Key="CategoryVideoBrush" Color="#FFB80672" />
+    <SolidColorBrush x:Key="CategoryArchiveBrush" Color="#FF9A6700" />
+    <SolidColorBrush x:Key="CategoryTextDataBrush" Color="#FF007B83" />
+    <SolidColorBrush x:Key="CategoryOtherBrush" Color="#FF5F6368" />
+</ResourceDictionary>

@@ -1,0 +1,38 @@
+<UserControl x:Class="FileOrbit.App.Main.HistoryPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel Margin="0,0,24,24">
+        <StackPanel DockPanel.Dock="Top">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Content="Clear history" Click="OnClear" VerticalAlignment="Center" />
+                <TextBlock Text="History" Style="{StaticResource PageTitle}" />
+            </DockPanel>
+            <TextBlock Style="{StaticResource PageSubtitle}" Text="Your recent conversions. History is stored only on this PC and can be turned off in Settings." />
+            <TextBox x:Name="SearchBox" TextChanged="OnSearch" Margin="0,0,0,12" AutomationProperties.Name="Search history"
+                     ToolTip="Search by file name or format" />
+        </StackPanel>
+        <Grid>
+            <TextBlock x:Name="EmptyText" Style="{StaticResource Subtle}" Text="No conversions yet." />
+            <ListView x:Name="HistoryList" BorderThickness="0" Background="Transparent">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="When" Width="140" DisplayMemberBinding="{Binding When}" />
+                        <GridViewColumn Header="File" Width="220" DisplayMemberBinding="{Binding File}" />
+                        <GridViewColumn Header="Action" Width="150" DisplayMemberBinding="{Binding Entry.ActionTitle}" />
+                        <GridViewColumn Header="Result" Width="200" DisplayMemberBinding="{Binding Result}" />
+                        <GridViewColumn Header="" Width="150">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="Show" Click="OnShow" Tag="{Binding}" Margin="0,0,6,0" />
+                                        <Button Content="Again" Click="OnAgain" Tag="{Binding}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </Grid>
+    </DockPanel>
+</UserControl>

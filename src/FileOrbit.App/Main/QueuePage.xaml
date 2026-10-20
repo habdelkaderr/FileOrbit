@@ -1,0 +1,55 @@
+<UserControl x:Class="FileOrbit.App.Main.QueuePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="Visible" />
+    </UserControl.Resources>
+    <DockPanel Margin="0,0,24,24">
+        <StackPanel DockPanel.Dock="Top">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="Cancel all" Click="OnCancelAll" Margin="0,0,8,0" />
+                    <Button Content="Clear finished" Click="OnClearFinished" />
+                </StackPanel>
+                <TextBlock Text="Queue" Style="{StaticResource PageTitle}" />
+            </DockPanel>
+            <TextBlock Style="{StaticResource PageSubtitle}" Text="Conversions run in the background, a few at a time. Failed items can be retried." />
+        </StackPanel>
+        <Grid>
+            <TextBlock x:Name="EmptyText" Style="{StaticResource Subtle}" Text="Nothing in the queue." />
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl x:Name="JobList">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource Card}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="160" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Style="{StaticResource Subtle}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap">
+                                            <Run Text="{Binding Status, Mode=OneWay}" /><Run Text=" · " /><Run Text="{Binding Engine.Engine.DisplayName, Mode=OneWay}" /><Run Text=" · " /><Run Text="{Binding Stage, Mode=OneWay}" />
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding Message}" Style="{StaticResource Subtle}" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                    <ProgressBar Grid.Column="1" Height="4" Margin="12,0" VerticalAlignment="Center" Minimum="0" Maximum="1"
+                                                 Value="{Binding Progress, Mode=OneWay, TargetNullValue=0}" />
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Button Content="Cancel" Click="OnCancel" Tag="{Binding}" Margin="6,0,0,0" Visibility="{Binding CanCancel, Converter={StaticResource Visible}}" />
+                                        <Button Content="Retry" Click="OnRetry" Tag="{Binding}" Margin="6,0,0,0" Visibility="{Binding CanRetry, Converter={StaticResource Visible}}" />
+                                        <Button Content="Show" Click="OnShow" Tag="{Binding}" Margin="6,0,0,0" ToolTip="Show in folder" Visibility="{Binding IsFinished, Converter={StaticResource Visible}}" />
+                                        <Button Content="&#xE711;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Click="OnRemove" Tag="{Binding}" Margin="6,0,0,0"
+                                                ToolTip="Remove from list" AutomationProperties.Name="Remove from list" Visibility="{Binding IsFinished, Converter={StaticResource Visible}}" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </DockPanel>
+</UserControl>
