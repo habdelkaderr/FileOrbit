@@ -105,5 +105,15 @@ public static class WpfHost
 /// <summary>Runs once for the whole test assembly and shuts the shared WPF thread down at the end.</summary>
 public sealed class WpfHostFixture : IDisposable
 {
-    public void Dispose() => WpfHost.Shutdown();
+    public void Dispose()
+    {
+        // Release Windows Runtime/COM objects (PDF, OCR, imaging, thumbnails) while their apartments still
+        // exist; finalizing them during process teardown can crash the test host after all tests passed.
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        WpfHost.Shutdown();
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+    }
 }
