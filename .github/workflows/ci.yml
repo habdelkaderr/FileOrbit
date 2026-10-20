@@ -24,7 +24,15 @@ jobs:
 
       # Locked mode: fails if any NuGet package differs from packages.lock.json (version or content hash).
       - name: Restore (locked)
-        run: dotnet restore --locked-mode
+        shell: pwsh
+        run: |
+          $output = dotnet restore --locked-mode 2>&1
+          $output | Write-Host
+          if ($LASTEXITCODE -ne 0) {
+            # Surface restore errors as annotations so they are visible on the run summary.
+            $output | Select-String -Pattern 'error' | Select-Object -First 10 | ForEach-Object { Write-Host "::error::$_" }
+            exit 1
+          }
 
       - name: Build
         run: dotnet build --no-restore -c Release
