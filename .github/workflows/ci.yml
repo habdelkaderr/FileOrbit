@@ -50,5 +50,6 @@ jobs:
             for ($i = 0; $i -lt $lines.Count; $i++) {
               if ($lines[$i] -match '^failed ') { Write-Host "::error::$($lines[$i].Trim()) -- $(($lines[($i+1)..($i+3)] -join ' ').Trim())" }
             }
+            $lines | Select-Object -Last 12 | Where-Object { $_.Trim() } | ForEach-Object { Write-Host "::error::$($_.Trim())" }
             exit 1
           }
