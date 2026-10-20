@@ -9,6 +9,10 @@
     <Product>FileOrbit</Product>
     <Copyright>Copyright © 2026 FileOrbit contributors</Copyright>
     <Deterministic>true</Deterministic>
+    <!-- packages.lock.json pins every dependency's version and content hash; CI restores in locked mode. -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <!-- FileOrbit ships for 64-bit Windows; listing it keeps lock files stable for builds and publishes. -->
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <WindowsTargetFramework>net10.0-windows10.0.19041.0</WindowsTargetFramework>
   </PropertyGroup>

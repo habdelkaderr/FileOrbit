@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Least privilege: this workflow only reads the repository.
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      # Locked mode: fails if any NuGet package differs from packages.lock.json (version or content hash).
+      - name: Restore (locked)
+        run: dotnet restore --locked-mode
+
+      - name: Build
+        run: dotnet build --no-restore -c Release
+
+      # Microsoft Office is not available on hosted runners; those tests skip themselves when Office is
+      # missing, and the trait filter keeps the run fast.
+      - name: Test
+        run: dotnet test --no-build -c Release -- --filter-not-trait "Category=Office"

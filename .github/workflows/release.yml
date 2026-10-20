@@ -1,0 +1,67 @@
+name: Release
+
+# Builds the portable download on GitHub's servers from the tagged source, so the published zip is
+# traceable to this exact commit. Create a release with:  git tag v0.1.0 && git push origin v0.1.0
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: windows-latest
+    permissions:
+      contents: write       # create the GitHub release
+      id-token: write       # sign the build provenance attestation
+      attestations: write   # store the attestation
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore (locked)
+        run: dotnet restore --locked-mode
+
+      - name: Test
+        run: |
+          dotnet build --no-restore -c Release
+          dotnet test --no-build -c Release -- --filter-not-trait "Category=Office"
+
+      - name: Build portable folder and zip
+        shell: pwsh
+        run: ./build/Publish-Portable.ps1
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            artifacts/FileOrbit-*-win-x64.zip
+            artifacts/FileOrbit-*-win-x64/FileOrbit.exe
+
+      - name: Create GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          $zip = Get-ChildItem artifacts -Filter 'FileOrbit-*-win-x64.zip' | Select-Object -First 1
+          $sum = Get-ChildItem artifacts -Filter 'FileOrbit-*-win-x64.zip.sha256' | Select-Object -First 1
+          $hash = (Get-Content $sum.FullName).Split(' ')[0]
+          $notes = @"
+          Portable FileOrbit: unzip and run FileOrbit.exe (64-bit Windows 10 2004+ / Windows 11, no installation needed).
+
+          Built by GitHub Actions from commit $env:GITHUB_SHA.
+          SHA-256 of $($zip.Name): ``$hash``
+
+          Verify the download came from this repository's build:
+              gh attestation verify $($zip.Name) --repo $env:GITHUB_REPOSITORY
+
+          FileOrbit is not code-signed yet: Windows may show "Windows protected your PC" (More info > Run anyway).
+          "@
+          gh release create $env:TAG $zip.FullName $sum.FullName --title "FileOrbit $env:TAG" --notes $notes

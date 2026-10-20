@@ -41,5 +41,10 @@ entry and start-up option, exit it from the notification-area icon, then delete 
 "@
 
 Compress-Archive -Path $output -DestinationPath $zip -CompressionLevel Optimal
+
+# Checksum so downloaders can verify the zip (Get-FileHash <zip> -Algorithm SHA256).
+$hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+Set-Content -Path "$zip.sha256" -Encoding ascii -Value "$hash  $name.zip"
+Write-Host "SHA-256: $hash"
 Get-ChildItem $output | Select-Object Name, @{ n = 'MB'; e = { [math]::Round($_.Length / 1MB, 1) } } | Format-Table -AutoSize
 Write-Host ("Portable folder: {0}`nZip: {1} ({2:N0} MB)" -f $output, $zip, ((Get-Item $zip).Length / 1MB))
