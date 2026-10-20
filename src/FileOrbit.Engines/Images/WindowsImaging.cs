@@ -48,7 +48,42 @@ public static class WindowsImaging
     /// <summary>File extensions (".heic", ".webp", ...) that installed WIC decoders can read.</summary>
     public static IReadOnlySet<string> SupportedDecoderExtensions => DecoderExtensions.Value;
 
-    public static bool CanDecode(string extension) => DecoderExtensions.Value.Contains(extension.ToLowerInvariant());
+    /// <summary>
+    /// True when Windows can really decode the format. A registered decoder is not enough: some Windows
+    /// editions list a WebP codec that fails on use, so WebP is verified by decoding a tiny sample once.
+    /// </summary>
+    public static bool CanDecode(string extension)
+    {
+        var normalized = extension.ToLowerInvariant();
+        return DecoderExtensions.Value.Contains(normalized) && (normalized != ".webp" || WebPDecodeWorks.Value);
+    }
+
+    private static readonly Lazy<bool> WebPDecodeWorks = new(ProbeWebPDecode);
+
+    private static bool ProbeWebPDecode()
+    {
+        try
+        {
+            using var bitmap = new SkiaSharp.SKBitmap(2, 2);
+            bitmap.Erase(SkiaSharp.SKColors.SteelBlue);
+            using var pixmap = bitmap.PeekPixels();
+            using var data = pixmap.Encode(new SkiaSharp.SKWebpEncoderOptions(SkiaSharp.SKWebpEncoderCompression.Lossless, 100));
+            var bytes = data.ToArray();
+
+            // Run off the caller's thread so a UI synchronization context can never deadlock the probe.
+            return Task.Run(async () =>
+            {
+                using var stream = new MemoryStream(bytes).AsRandomAccessStream();
+                var decoder = await BitmapDecoder.CreateAsync(stream);
+                var pixels = await decoder.GetPixelDataAsync();
+                return decoder.PixelWidth == 2 && pixels.DetachPixelData().Length > 0;
+            }).GetAwaiter().GetResult();
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
 
     /// <summary>Decodes the first frame, applying EXIF orientation and converting to sRGB.</summary>
     public static async Task<RasterImage> DecodeAsync(string path, int? maxDimension, bool readMetadata, CancellationToken cancellationToken)
