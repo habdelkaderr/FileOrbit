@@ -11,16 +11,31 @@ Everything runs locally. FileOrbit never uploads files and has no telemetry.
 
 ## Download
 
-1. Go to [**Releases**](https://github.com/habdelkaderr/FileOrbit/releases) and download
-   `FileOrbit-<version>-win-x64.zip`.
-2. Unzip it anywhere (for example into `Documents\FileOrbit`) and double-click **FileOrbit.exe**.
-   No installation and no .NET runtime are needed.
-3. Select a file in File Explorer and press **Ctrl+Alt+Space**, or right-click it and choose
-   **Show more options → Convert with FileOrbit**.
+Go to [**Releases**](https://github.com/habdelkaderr/FileOrbit/releases/latest) and pick one:
 
-Requires Windows 10 (version 2004) or Windows 11, 64-bit. FileOrbit is not code-signed yet, so Windows
-may show *"Windows protected your PC"*. Choose **More info → Run anyway**. On PCs with Smart App Control
-turned on, unsigned apps can be blocked entirely until releases are signed.
+| File | What it is |
+|---|---|
+| `FileOrbit-<version>-x64.msi` | **Installer (recommended).** Double-click it. FileOrbit installs for your user account (no administrator password), appears in the Start menu, starts, and can be uninstalled from *Settings → Apps → Installed apps*. |
+| `FileOrbit-<version>-win-x64.zip` | **Portable.** Right-click the zip → **Extract All…**, then run `FileOrbit.exe` from the extracted folder. Don't run it from inside the zip. |
+
+Then select a file in File Explorer and press **Ctrl+Alt+Space**, or right-click it and choose
+**Show more options → Convert with FileOrbit**. FileOrbit keeps running in the notification area
+(next to the clock) so it opens instantly.
+
+Requires 64-bit Windows 10 (version 2004 or later) or Windows 11. No .NET or other software is needed.
+
+**Before you run it:**
+
+- **Check the download is genuine.** Each file has a matching `.sha256` with its fingerprint. Compare it
+  with the output of `Get-FileHash <file> -Algorithm SHA256` in PowerShell. Releases are built by GitHub
+  from this repository's source (see [SECURITY.md](SECURITY.md)).
+- **Expect a Windows warning.** FileOrbit is not code-signed yet, so Windows may show *"Windows
+  protected your PC"*. Choose **More info → Run anyway**. On PCs with Smart App Control turned on,
+  unsigned apps can be blocked entirely until releases are signed.
+
+**Sharing on a USB drive:** copy the `FileOrbit-USB` folder (made by `build/Make-UsbFolder.ps1`)
+to the drive. On another PC, run the setup `.msi` from the drive, or run `FileOrbit.exe` directly: it
+offers to install itself on that PC, so it keeps working after the drive is removed.
 
 ## Contents
 

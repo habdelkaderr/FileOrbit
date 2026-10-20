@@ -27,7 +27,10 @@
     </StandardDirectory>
 
     <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
-      <Files Include="$(var.PublishDir)**" />
+      <!-- The portable folder's "START HERE.txt" describes the zip download; the installer doesn't need it. -->
+      <Files Include="$(var.PublishDir)**">
+        <Exclude Files="$(var.PublishDir)START HERE.txt" />
+      </Files>
     </ComponentGroup>
 
     <!-- Start menu shortcut (with the app's AppUserModelID so Windows groups its notifications). -->
@@ -69,8 +72,12 @@
     <!-- On uninstall, also remove what FileOrbit wrote at run time (the start-with-Windows entry). -->
     <CustomAction Id="UnregisterShell" Directory="INSTALLFOLDER" ExeCommand="&quot;[INSTALLFOLDER]FileOrbit.exe&quot; --unregister-shell"
                   Execute="immediate" Return="ignore" />
+    <!-- Start FileOrbit when an interactive install finishes, like most downloaded programs do. -->
+    <CustomAction Id="LaunchFileOrbit" Directory="INSTALLFOLDER" ExeCommand="&quot;[INSTALLFOLDER]FileOrbit.exe&quot; --main"
+                  Execute="immediate" Return="asyncNoWait" />
     <InstallExecuteSequence>
       <Custom Action="UnregisterShell" Before="RemoveFiles" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
+      <Custom Action="LaunchFileOrbit" After="InstallFinalize" Condition="NOT REMOVE AND UILevel &gt; 3" />
     </InstallExecuteSequence>
 
     <Feature Id="Main" Title="FileOrbit" Level="1">

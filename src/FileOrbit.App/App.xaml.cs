@@ -61,11 +61,68 @@ public partial class App
             Persistent = Services.Settings.RunInTray,
         };
         ApplyHotkey();
-        EnsureShellIntegration();
+        var fromRemovableDrive = PortableInstall.IsRunningFromRemovableDrive();
+        if (!fromRemovableDrive)
+        {
+            // From a USB drive, registering the Explorer entry would leave a broken menu item once the drive is removed.
+            EnsureShellIntegration();
+        }
+
         Services.Queue.JobFinished += (_, job) => Dispatcher.BeginInvoke(() => OnJobFinished(job));
 
         _instance.StartServer(command => Dispatcher.BeginInvoke(() => Handle(command)));
         Handle(_initialCommand);
+        if (fromRemovableDrive && _initialCommand.Mode != LaunchMode.Background)
+        {
+            Dispatcher.BeginInvoke(OfferInstallFromRemovableDrive, DispatcherPriority.ApplicationIdle);
+        }
+    }
+
+    /// <summary>Set when FileOrbit should start another copy after this one exits (the freshly installed one).</summary>
+    public string? RelaunchExecutable { get; private set; }
+
+    private void OfferInstallFromRemovableDrive()
+    {
+        var drive = Path.GetPathRoot(ShellRegistration.CurrentExecutable);
+        var answer = MessageBox.Show(
+            $"FileOrbit is running from a removable drive ({drive}).\n\n" +
+            "Install it on this PC? It is copied to your user folder (no administrator rights needed), so the " +
+            "right-click menu and the keyboard shortcut keep working after you remove the drive.\n\n" +
+            "Choose No to use it from the drive this time only. The right-click menu entry is available after installing.",
+            "Install FileOrbit on this PC?", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (answer != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            var installed = PortableInstall.Install();
+            if (Services.Settings.ExplorerIntegration)
+            {
+                new ShellRegistration(installed).Register();
+            }
+
+            Services.Log.Info("Installed from removable drive", ("target", installed));
+            RelaunchExecutable = installed;
+            Shutdown();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or System.Runtime.InteropServices.COMException)
+        {
+            Services.Log.Error(ex, "Install from removable drive failed");
+            MessageBox.Show(
+                $"FileOrbit could not be installed: {ex.Message}\n\nIf FileOrbit is already installed and running on this PC, exit it from its notification-area icon and try again.",
+                "FileOrbit", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    /// <summary>Removes the installed copy from this PC and exits.</summary>
+    public void UninstallFromThisPc()
+    {
+        Services.Queue.CancelAll();
+        PortableInstall.ScheduleUninstall();
+        Services.Log.Info("Uninstalled from this PC");
+        Shutdown();
     }
 
     public void Handle(CommandLine command)

@@ -33,14 +33,15 @@ jobs:
           dotnet build --no-restore -c Release
           dotnet test --no-build -c Release -- --filter-not-trait "Category=Office"
 
-      - name: Build portable folder and zip
+      - name: Build installer, portable folder and zip
         shell: pwsh
-        run: ./build/Publish-Portable.ps1
+        run: ./build/Build-Installer.ps1
 
       - name: Attest build provenance
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: |
+            artifacts/FileOrbit-*-x64.msi
             artifacts/FileOrbit-*-win-x64.zip
             artifacts/FileOrbit-*-win-x64/FileOrbit.exe
 
@@ -50,18 +51,20 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
-          $zip = Get-ChildItem artifacts -Filter 'FileOrbit-*-win-x64.zip' | Select-Object -First 1
-          $sum = Get-ChildItem artifacts -Filter 'FileOrbit-*-win-x64.zip.sha256' | Select-Object -First 1
-          $hash = (Get-Content $sum.FullName).Split(' ')[0]
-          $notes = @"
-          Portable FileOrbit: unzip and run FileOrbit.exe (64-bit Windows 10 2004+ / Windows 11, no installation needed).
-
-          Built by GitHub Actions from commit $env:GITHUB_SHA.
-          SHA-256 of $($zip.Name): ``$hash``
-
-          Verify the download came from this repository's build:
-              gh attestation verify $($zip.Name) --repo $env:GITHUB_REPOSITORY
-
-          FileOrbit is not code-signed yet: Windows may show "Windows protected your PC" (More info > Run anyway).
-          "@
-          gh release create $env:TAG $zip.FullName $sum.FullName --title "FileOrbit $env:TAG" --notes $notes
+          $files = Get-ChildItem artifacts -File | Where-Object { $_.Name -match '^FileOrbit-.*-(x64\.msi|win-x64\.zip)(\.sha256)?$' }
+          $lines = $files | Where-Object Extension -eq '.sha256' | ForEach-Object { $h, $n = (Get-Content $_.FullName).Split('  '); "- ``$n``: ``$h``" }
+          $notes = @(
+            "**Installer (recommended):** download the ``.msi`` and double-click it. Installs for your user account, no administrator password needed."
+            ""
+            "**Portable:** download the ``.zip``, right-click it > Extract All, then run FileOrbit.exe."
+            ""
+            "Requires 64-bit Windows 10 (2004+) or Windows 11. Built by GitHub Actions from commit $env:GITHUB_SHA."
+            ""
+            "SHA-256 fingerprints:"
+            $lines
+            ""
+            "Verify a download came from this repository's build: ``gh attestation verify <file> --repo $env:GITHUB_REPOSITORY``"
+            ""
+            "FileOrbit is not code-signed yet: Windows may show ""Windows protected your PC"" (More info > Run anyway)."
+          ) -join "`n"
+          gh release create $env:TAG ($files.FullName) --title "FileOrbit $env:TAG" --notes $notes

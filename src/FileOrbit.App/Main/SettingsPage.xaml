@@ -125,7 +125,10 @@
                     <TextBlock x:Name="VersionText" FontWeight="SemiBold" />
                     <TextBlock Style="{StaticResource Subtle}" Margin="0,4,0,8"
                                Text="FileOrbit uses open-source components (PdfPig, ClosedXML, Open XML SDK, Markdig, SkiaSharp, Svg.Skia) and optional external programs you install yourself." />
-                    <Button Content="Third-party notices" HorizontalAlignment="Left" Click="OnNotices" />
+                    <WrapPanel>
+                        <Button Content="Third-party notices" Click="OnNotices" Margin="0,0,8,0" />
+                        <Button x:Name="UninstallButton" Content="Remove FileOrbit from this PC…" Click="OnUninstall" Visibility="Collapsed" />
+                    </WrapPanel>
                 </StackPanel>
             </Border>
         </StackPanel>

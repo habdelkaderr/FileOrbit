@@ -29,15 +29,29 @@ public static class Program
             return 0;
         }
 
-        using var instance = new InstanceChannel("FileOrbit");
-        if (!instance.IsPrimary && instance.TryForward(commandLine, TimeSpan.FromSeconds(3)))
+        int exitCode;
+        string? relaunch;
+        using (var instance = new InstanceChannel("FileOrbit"))
         {
-            return 0; // Fast path: the running instance shows the menu.
+            if (!instance.IsPrimary && instance.TryForward(commandLine, TimeSpan.FromSeconds(3)))
+            {
+                return 0; // Fast path: the running instance shows the menu.
+            }
+
+            Interop.NativeMethods.SetCurrentProcessExplicitAppUserModelId(AppUserModelId);
+            var app = new App(instance, commandLine);
+            app.InitializeComponent();
+            exitCode = app.Run();
+            relaunch = app.RelaunchExecutable;
         }
 
-        Interop.NativeMethods.SetCurrentProcessExplicitAppUserModelId(AppUserModelId);
-        var app = new App(instance, commandLine);
-        app.InitializeComponent();
-        return app.Run();
+        // After installing from a USB drive, hand over to the installed copy once this instance has
+        // released the single-instance lock.
+        if (relaunch is not null && File.Exists(relaunch))
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(relaunch, CommandLine.MainSwitch) { UseShellExecute = false })?.Dispose();
+        }
+
+        return exitCode;
     }
 }

@@ -48,6 +48,7 @@ public partial class SettingsPage : UserControl
         HistoryBox.IsChecked = Settings.KeepHistory;
         DataFolderText.Text = $"Data folder: {_services.DataDirectory}";
         VersionText.Text = $"FileOrbit {typeof(SettingsPage).Assembly.GetName().Version?.ToString(3)}";
+        UninstallButton.Visibility = PortableInstall.IsRunningInstalledCopy() ? Visibility.Visible : Visibility.Collapsed;
         _loading = false;
     }
 
@@ -246,6 +247,31 @@ public partial class SettingsPage : UserControl
     }
 
     private void OnOpenData(object sender, RoutedEventArgs e) => ShellActions.OpenFolder(_services.DataDirectory);
+
+    private void OnUninstall(object sender, RoutedEventArgs e)
+    {
+        if (InstalledByMsi())
+        {
+            // Installed with the MSI: uninstall through Windows so its records stay correct.
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("ms-settings:appsfeatures") { UseShellExecute = true })?.Dispose();
+            MessageBox.Show(Window.GetWindow(this), "In Installed apps, find FileOrbit, click … and choose Uninstall.", "Remove FileOrbit", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        if (MessageBox.Show(Window.GetWindow(this),
+                "Remove FileOrbit from this PC?\n\nThe program, its right-click menu entry, the start-up entry and the Start menu shortcut are removed. " +
+                "Your converted files are not touched. Settings and history stay in %LocalAppData%\\FileOrbit (delete that folder to remove them too).",
+                "Remove FileOrbit", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+        {
+            App.Current.UninstallFromThisPc();
+        }
+    }
+
+    private static bool InstalledByMsi()
+    {
+        using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\FileOrbit\Installer");
+        return key is not null;
+    }
 
     private void OnNotices(object sender, RoutedEventArgs e)
     {

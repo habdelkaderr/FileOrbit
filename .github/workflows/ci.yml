@@ -53,3 +53,8 @@ jobs:
             $lines | Select-Object -Last 12 | Where-Object { $_.Trim() } | ForEach-Object { Write-Host "::error::$($_.Trim())" }
             exit 1
           }
+
+      # Catch packaging problems (WiX validation runs here, as the runner is elevated) before a release.
+      - name: Build installer and portable zip
+        shell: pwsh
+        run: ./build/Build-Installer.ps1
