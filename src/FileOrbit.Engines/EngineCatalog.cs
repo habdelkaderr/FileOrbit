@@ -1,4 +1,4 @@
-﻿using FileOrbit.Core.Capabilities;
+using FileOrbit.Core.Capabilities;
 using FileOrbit.Engines.Archives;
 using FileOrbit.Engines.Data;
 using FileOrbit.Engines.Images;
@@ -35,6 +35,8 @@ public static class EngineCatalog
         [
             // Built in: always available, run entirely on this PC.
             new ImageEngine(),
+            new ImageEditEngine(),
+            new BackgroundRemovalEngine(),
             new WindowsPdfEngine(),
             new PdfTextEngine(),
             new TabularEngine(),

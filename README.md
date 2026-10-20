@@ -118,7 +118,9 @@ and a conversion that produced the wrong type or an empty file is reported as fa
 
 | Engine | Ships with | Conversions |
 |---|---|---|
-| **Windows Imaging + Skia** | FileOrbit and Windows | PNG, JPEG, BMP, GIF, TIFF, ICO (multi-size), WebP, PDF from PNG/JPEG/BMP/GIF/TIFF/ICO/WebP*/HEIC*/AVIF*; SVG → PNG/JPEG/WebP/ICO and vector PDF; Resize; Compress. EXIF orientation is applied; metadata can be kept, kept without location, or removed. |
+| **Windows Imaging + Skia** | FileOrbit and Windows | PNG, JPEG, BMP, GIF, TIFF, ICO (multi-size), WebP, PDF from PNG/JPEG/BMP/GIF/TIFF/ICO/WebP*/HEIC*/AVIF*; SVG → PNG/JPEG/WebP/ICO and vector PDF. EXIF orientation is applied; metadata can be kept, kept without location, or removed. |
+| **Image editor** | FileOrbit | **Resize** by longest side, width, height, exact size (fit, fill-and-crop, stretch) or percentage; **Compress** to a size limit (under 200 KB … 2 MB) or quality; **Rotate/flip**; **Crop** to 1:1, 4:5, 3:4, 9:16, 4:3, 3:2, 16:9; **Trim borders**; **Black & white / sepia / high contrast**; **Auto enhance**. Each edit saves a new file such as `photo (resized).jpg`. |
+| **Background remover (AI)** | FileOrbit | **Remove background** from photos: the U²-Net-P model runs on the CPU, offline, and saves a transparent (or white/black) PNG. Best with one clear subject. |
 | **Windows PDF renderer** | Windows | PDF → PNG/JPEG (one per page; several pages go into a folder), multi-page TIFF, PPTX (one picture slide per page) |
 | **PdfPig** | FileOrbit | PDF → TXT, Markdown, HTML, DOCX (text only), XLSX/CSV (heuristic table detection) |
 | **Windows OCR** | Windows | Text (OCR) from scanned PDFs and images, in any OCR language installed in Windows |
@@ -311,8 +313,13 @@ build/                 Publish and installer scripts
 
 ## Security and privacy
 
-- **Local processing only.** No network calls, uploads, telemetry or analytics. SVG and HTML inputs have
-  remote references stripped before rendering, so even Word or Skia can't fetch them.
+- **Local processing only.** Files are never uploaded and there is no telemetry or analytics. SVG and
+  HTML inputs have remote references stripped before rendering, so even Word or Skia can't fetch them.
+- **Update check (the only network access).** Once a day, and when you click *Check for updates* in
+  Settings, FileOrbit asks `api.github.com` for this repository's latest release number. Nothing about
+  you or your files is sent. If a newer version exists you get a notification and a link to the
+  release page; FileOrbit never downloads or installs anything by itself. Turn it off in *Settings →
+  Updates*.
 - **Untrusted input.** Detection is by content. Paths are normalised and validated (no device paths,
   alternate data streams, reserved names or relative paths). Archive extraction rejects absolute and
   `..` paths (zip slip), skips links, and enforces size, entry-count and compression-ratio limits.
@@ -346,4 +353,5 @@ build/                 Publish and installer scripts
 | HEIC, WebP or AVIF photos can't be opened | Install the free *HEIF Image Extensions* + *HEVC Video Extensions*, *WebP Image Extensions* or *AV1 Video Extension* from the Microsoft Store. |
 | "An Application Control policy has blocked this file", FileOrbit doesn't start, or an engine plugin is listed as blocked | Smart App Control or WDAC blocked an unsigned FileOrbit file (see *Code-sign every release*). Use a signed build. A blocked *plugin* only disables that engine; a blocked `FileOrbit.dll` stops the app from starting. Details are in Event Viewer under *Applications and Services Logs → Microsoft → Windows → CodeIntegrity → Operational*. |
 | An Office conversion takes very long | FileOrbit stops Office after 10 minutes (1 hour for video) and reports it. Large PDFs in Word PDF Reflow can be slow. |
+| How do I update? | FileOrbit tells you when a new version is out (notification and a banner on Home). Click it to open the release page, download the `.msi` and run it; it replaces the old version and keeps your settings. *Settings → Updates → Check for updates* checks right away. |
 | A conversion failed | Open *Technical details* on the card or the Queue page. Logs are in `%LocalAppData%\FileOrbit\logs` (*Settings → Open log folder*). |

@@ -174,7 +174,7 @@ public static class RadialMenuBuilder
         FormatCategory.Archive => "Archives",
         FormatCategory.TextData => "Text & data",
         FormatCategory.Folder => "Folder",
-        _ => "Other actions",
+        _ => "Edit & tools",
     };
 
     private static List<ConversionAction> Rank(List<ConversionAction> actions, FormatCatalog catalog, RadialBuildOptions options) =>

@@ -17,7 +17,6 @@ public sealed class ImageEngine : ConversionEngineBase
 
     private static readonly string[] RasterSources = ["png", "jpeg", "bmp", "gif", "tiff", "ico", "webp", "heic", "avif"];
     private static readonly string[] Targets = ["png", "jpeg", "webp", "bmp", "gif", "tiff", "ico", "pdf"];
-    private static readonly string[] ResizableFormats = ["png", "jpeg", "webp", "bmp", "tiff"];
 
     public override string Id => EngineId;
 
@@ -75,30 +74,6 @@ public sealed class ImageEngine : ConversionEngineBase
                 };
             }
         }
-
-        foreach (var format in ResizableFormats)
-        {
-            yield return Cap(format, format, format is "jpeg" or "webp" ? Fidelity.Lossy : Fidelity.Lossless, quality: 70) with
-            {
-                Action = ActionKind.Transform,
-                Variant = "resized",
-                Label = "Resize",
-                Note = "Creates a smaller copy; the original is kept",
-                Options = [MaxSizeOption("1920", includeOriginal: false), .. QualityOptions(format), MetadataOption],
-            };
-        }
-
-        foreach (var format in new[] { "jpeg", "webp" })
-        {
-            yield return Cap(format, format, Fidelity.Lossy, quality: 70) with
-            {
-                Action = ActionKind.Transform,
-                Variant = "compressed",
-                Label = "Compress",
-                Note = "Re-encodes at a lower quality to reduce file size",
-                Options = [QualityOption("65"), MaxSizeOption("original", includeOriginal: true), MetadataOption],
-            };
-        }
     }
 
     public override async Task ConvertAsync(ConversionContext context, CancellationToken cancellationToken)
@@ -107,12 +82,7 @@ public sealed class ImageEngine : ConversionEngineBase
         var target = context.Target.Id;
         var options = context.Options;
         var maxSize = ParseMaxSize(options.Get("maxSize", "original"));
-        var metadataMode = options.Get("metadata", "keep") switch
-        {
-            "nolocation" => MetadataMode.KeepWithoutLocation,
-            "remove" => MetadataMode.Remove,
-            _ => MetadataMode.Keep,
-        };
+        var metadataMode = MetadataModeFrom(options);
 
         context.Report(0.05, "Reading image");
         if (source == "svg" && target == "pdf")
@@ -133,9 +103,20 @@ public sealed class ImageEngine : ConversionEngineBase
 
         cancellationToken.ThrowIfCancellationRequested();
         context.Report(0.5, "Encoding");
-        var quality = options.GetInt("quality", 90);
-        var output = context.PrimaryOutputPath;
+        await SaveAsync(image, context, context.PrimaryOutputPath, metadataMode, cancellationToken);
+        context.Report(1, "Done");
+    }
 
+    /// <summary>
+    /// Encodes <paramref name="image"/> as <see cref="ConversionContext.Target"/> using the context's
+    /// quality options, adding user-facing warnings for anything the format cannot keep.
+    /// Shared by conversions, edits and background removal so every output is written the same way.
+    /// </summary>
+    internal static async Task SaveAsync(RasterImage image, ConversionContext context, string output, MetadataMode metadataMode, CancellationToken cancellationToken, int? qualityOverride = null)
+    {
+        var options = context.Options;
+        var target = context.Target.Id;
+        var quality = qualityOverride ?? options.GetInt("quality", 90);
         switch (target)
         {
             case "webp":
@@ -171,9 +152,14 @@ public sealed class ImageEngine : ConversionEngineBase
 
                 break;
         }
-
-        context.Report(1, "Done");
     }
+
+    internal static MetadataMode MetadataModeFrom(ConversionOptions options) => options.Get("metadata", "keep") switch
+    {
+        "nolocation" => MetadataMode.KeepWithoutLocation,
+        "remove" => MetadataMode.Remove,
+        _ => MetadataMode.Keep,
+    };
 
     private static async Task WriteIcoAsync(RasterImage image, string output, CancellationToken cancellationToken)
     {
@@ -250,7 +236,7 @@ public sealed class ImageEngine : ConversionEngineBase
         return [.. options];
     }
 
-    private static IEnumerable<OptionDescriptor> QualityOptions(string target)
+    internal static IEnumerable<OptionDescriptor> QualityOptions(string target)
     {
         if (target is "jpeg" or "webp")
         {
@@ -263,7 +249,7 @@ public sealed class ImageEngine : ConversionEngineBase
         }
     }
 
-    private static OptionDescriptor QualityOption(string defaultValue) =>
+    internal static OptionDescriptor QualityOption(string defaultValue) =>
         OptionDescriptor.Choice("quality", "Quality", defaultValue,
             new("95", "Maximum", "Largest files"),
             new("90", "High"),
@@ -271,7 +257,7 @@ public sealed class ImageEngine : ConversionEngineBase
             new("65", "Small", "Noticeable artefacts on detailed photos"),
             new("45", "Smallest"));
 
-    private static OptionDescriptor MaxSizeOption(string defaultValue, bool includeOriginal)
+    internal static OptionDescriptor MaxSizeOption(string defaultValue, bool includeOriginal)
     {
         var choices = new List<OptionChoice>();
         if (includeOriginal)
@@ -293,7 +279,7 @@ public sealed class ImageEngine : ConversionEngineBase
         };
     }
 
-    private static readonly OptionDescriptor MetadataOption = OptionDescriptor.Choice("metadata", "Photo metadata", "keep",
+    internal static readonly OptionDescriptor MetadataOption = OptionDescriptor.Choice("metadata", "Photo metadata", "keep",
         new("keep", "Keep", "Camera, date and location where the format supports it"),
         new("nolocation", "Remove location", "Keep camera and date, drop GPS position"),
         new("remove", "Remove all")) with
@@ -301,5 +287,5 @@ public sealed class ImageEngine : ConversionEngineBase
         IsAdvanced = true,
     };
 
-    private static int? ParseMaxSize(string value) => int.TryParse(value, out var size) && size > 0 ? size : null;
+    internal static int? ParseMaxSize(string value) => int.TryParse(value, out var size) && size > 0 ? size : null;
 }

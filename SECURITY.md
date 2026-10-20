@@ -42,8 +42,12 @@ If either check fails, do not run the file.
 
 ## What the program does on your PC
 
-FileOrbit processes files locally and has no network code: it never uploads files and has no
-telemetry. It writes only:
+FileOrbit processes files locally: it never uploads files and has no telemetry. Its only network
+access is the update check: once a day (and when you click *Check for updates*) it reads the latest
+release number from `api.github.com/repos/habdelkaderr/FileOrbit/releases/latest`. No file data or
+personal information is sent, links are only opened if they point at this repository's release
+pages, and nothing is downloaded or installed automatically. The check can be turned off in
+*Settings → Updates*. It writes only:
 
 - converted files, next to the original (or a folder you choose); the original is never modified,
 - settings, history and logs in `%LocalAppData%\FileOrbit`,

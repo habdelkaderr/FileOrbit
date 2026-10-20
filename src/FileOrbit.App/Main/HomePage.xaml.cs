@@ -22,6 +22,10 @@ public partial class HomePage : UserControl
         _services = services;
         InitializeComponent();
         Loaded += (_, _) => Refresh();
+        if (Application.Current is App app)
+        {
+            app.Updates.StateChanged += (_, _) => Dispatcher.BeginInvoke(Refresh);
+        }
         services.History.Changed += (_, _) => Dispatcher.BeginInvoke(Refresh);
     }
 
@@ -35,10 +39,17 @@ public partial class HomePage : UserControl
             ? "The global shortcut is turned off. Turn it on in Settings."
             : (Application.Current as App)?.HotkeyError ?? $"Select files in File Explorer and press {_services.Settings.Hotkey}.";
 
+        var update = (Application.Current as App)?.Updates.AvailableUpdate;
+        UpdateBanner.Visibility = update is null ? Visibility.Collapsed : Visibility.Visible;
+        UpdateBannerText.Text = update is null ? string.Empty : $"FileOrbit {update.Version.ToString(3)} is available. Download it to get the latest features and fixes.";
+
         var recent = _services.History.Entries.Where(e => e.Status == JobStatus.Succeeded).Take(6).Select(e => new RecentItem(e)).ToList();
         RecentList.ItemsSource = recent;
         EmptyRecent.Visibility = recent.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
     }
+
+    private void OnUpdateBanner(object sender, RoutedEventArgs e) =>
+        UpdateService.OpenReleasePage((Application.Current as App)?.Updates.AvailableUpdate);
 
     private void OnBrowse(object sender, RoutedEventArgs e) => App.Current.ConvertViaPicker();
 

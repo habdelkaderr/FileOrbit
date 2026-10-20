@@ -72,6 +72,19 @@ public sealed class AppSettings
     public int MaxConcurrentJobs { get; set; } = 2;
 
     public bool ShowUnavailableActions { get; set; } = true;
+
+    /// <summary>Check GitHub once a day for a newer FileOrbit release (version number only).</summary>
+    public bool CheckForUpdates { get; set; } = true;
+
+    public DateTimeOffset? LastUpdateCheck { get; set; }
+
+    /// <summary>Newest release seen by the last check (tag and page), shown until the user updates.</summary>
+    public string? AvailableUpdateTag { get; set; }
+
+    public string? AvailableUpdateUrl { get; set; }
+
+    /// <summary>The release the user was last notified about, so each release is announced once.</summary>
+    public string? NotifiedUpdateTag { get; set; }
 }
 
 public sealed class SettingsStore

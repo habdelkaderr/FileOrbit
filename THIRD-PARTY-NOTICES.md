@@ -14,6 +14,8 @@ NuGet package.
 | [Markdig](https://github.com/xoofx/markdig) | 1.4.1 | BSD 2-Clause | Markdown rendering |
 | [SkiaSharp](https://github.com/mono/SkiaSharp) | 4.153.1 | MIT (Skia: BSD 3-Clause) | WebP encoding, PDF creation, SVG rendering |
 | [Svg.Skia](https://github.com/wieslawsoltes/Svg.Skia) | 5.2.3 | MIT | SVG parsing and rendering |
+| [ONNX Runtime](https://github.com/microsoft/onnxruntime) | 1.31.0 | MIT | Runs the background-removal model locally |
+| [U²-Net](https://github.com/xuebinqin/U-2-Net) model `u2netp.onnx` (ONNX export from [rembg](https://github.com/danielgatis/rembg)) | — | Apache License 2.0 (model); MIT (rembg) | Background removal. MD5 `8e83ca70e441ab06c318d82300c84806` |
 | .NET runtime and Windows Desktop runtime | 10.0 | MIT | Application runtime (self-contained builds) |
 
 Transitive dependencies of these packages (for example `ExcelNumberFormat`, `RBush`, `SixLabors.Fonts`

@@ -118,6 +118,22 @@
                 </StackPanel>
             </Border>
 
+            <!-- Updates -->
+            <TextBlock Text="Updates" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="CheckUpdatesButton" Content="Check for updates" Click="OnCheckUpdates" />
+                        <Button x:Name="DownloadUpdateButton" Content="Download update" Click="OnDownloadUpdate" Margin="8,0,0,0"
+                                Style="{DynamicResource AccentButtonStyle}" Visibility="Collapsed" />
+                    </StackPanel>
+                    <TextBlock x:Name="UpdateStatus" Margin="0,8,0,0" TextWrapping="Wrap" />
+                    <CheckBox x:Name="AutoUpdateBox" Content="Check for updates automatically (once a day)" Margin="0,12,0,0" Click="OnAutoUpdateChanged" />
+                    <TextBlock Style="{StaticResource Subtle}" Margin="26,2,0,0"
+                               Text="FileOrbit asks GitHub (api.github.com) for the latest version number. No files or personal information are sent, and nothing is downloaded or installed without you." />
+                </StackPanel>
+            </Border>
+
             <!-- About -->
             <TextBlock Text="About" Style="{StaticResource SectionTitle}" />
             <Border Style="{StaticResource Card}">

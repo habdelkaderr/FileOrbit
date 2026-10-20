@@ -44,7 +44,7 @@ public sealed class ImageConversionTests
         using var dir = new TestDirectory();
         var jpeg = await SampleFiles.JpegAsync(dir, width: 1600, height: 1200);
 
-        var job = await P.ConvertAsync(jpeg, "transform:jpeg:resized", new Dictionary<string, string> { ["maxSize"] = "800" });
+        var job = await P.ConvertAsync(jpeg, "transform:jpeg:resized", new Dictionary<string, string> { ["mode"] = "longest", ["size"] = "800" });
 
         Assert.EndsWith("photo (resized).jpg", job.PrimaryOutput);
         var decoded = await WindowsImaging.DecodeAsync(job.PrimaryOutput!, null, false, CancellationToken.None);

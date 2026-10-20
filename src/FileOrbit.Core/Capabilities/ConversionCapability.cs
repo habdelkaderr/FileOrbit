@@ -78,6 +78,9 @@ public sealed record ConversionCapability
     /// <summary>Optional label overriding the target format name (e.g. "Resize").</summary>
     public string? Label { get; init; }
 
+    /// <summary>Text added to the output file name for edits, e.g. "no background" gives "photo (no background).png".</summary>
+    public string? OutputSuffix { get; init; }
+
     public Fidelity Fidelity { get; init; } = Fidelity.Lossless;
 
     /// <summary>Short user-facing caveat, e.g. "Complex layouts may not convert perfectly."</summary>

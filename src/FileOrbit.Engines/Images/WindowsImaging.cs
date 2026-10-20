@@ -68,7 +68,7 @@ public static class WindowsImaging
             bitmap.Erase(SkiaSharp.SKColors.SteelBlue);
             using var pixmap = bitmap.PeekPixels();
             using var data = pixmap.Encode(new SkiaSharp.SKWebpEncoderOptions(SkiaSharp.SKWebpEncoderCompression.Lossless, 100));
-            var bytes = data.ToArray();
+            var bytes = data?.ToArray() ?? [];
 
             // Run off the caller's thread so a UI synchronization context can never deadlock the probe.
             return Task.Run(async () =>

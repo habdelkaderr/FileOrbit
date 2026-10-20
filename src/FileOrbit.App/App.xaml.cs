@@ -48,6 +48,8 @@ public partial class App
 
     public string? HotkeyError { get; private set; }
 
+    public UpdateService Updates { get; private set; } = null!;
+
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
@@ -61,6 +63,11 @@ public partial class App
             Persistent = Services.Settings.RunInTray,
         };
         ApplyHotkey();
+        Updates = new UpdateService(Services, release => _tray?.Notify(
+            $"FileOrbit {release.Version.ToString(3)} is available",
+            "Click to see what's new and download the update.",
+            false,
+            () => UpdateService.OpenReleasePage(release)));
         var fromRemovableDrive = PortableInstall.IsRunningFromRemovableDrive();
         if (!fromRemovableDrive)
         {
@@ -411,6 +418,7 @@ public partial class App
     {
         Services?.Queue.CancelAll();
         _hotkey?.Dispose();
+        Updates?.Dispose();
         _tray?.Dispose();
         Services?.Log.Info("FileOrbit exiting");
         Services?.Dispose();

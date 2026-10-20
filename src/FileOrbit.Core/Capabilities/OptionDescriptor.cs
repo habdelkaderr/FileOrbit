@@ -34,6 +34,17 @@ public sealed record OptionDescriptor
     /// <summary>Advanced options are collapsed by default.</summary>
     public bool IsAdvanced { get; init; }
 
+    /// <summary>When set, the option is only shown while option <see cref="ShowWhenKey"/> has one of <see cref="ShowWhenValues"/>.</summary>
+    public string? ShowWhenKey { get; init; }
+
+    public IReadOnlyList<string> ShowWhenValues { get; init; } = [];
+
+    /// <summary>Returns a copy that is shown only while <paramref name="key"/> has one of <paramref name="values"/>.</summary>
+    public OptionDescriptor ShownWhen(string key, params string[] values) => this with { ShowWhenKey = key, ShowWhenValues = values };
+
+    public bool IsVisible(IReadOnlyDictionary<string, string> values) =>
+        ShowWhenKey is null || (values.TryGetValue(ShowWhenKey, out var current) && ShowWhenValues.Contains(current));
+
     public static OptionDescriptor Choice(string key, string label, string defaultValue, params OptionChoice[] choices) =>
         new() { Key = key, Label = label, Kind = OptionKind.Choice, DefaultValue = defaultValue, Choices = choices };
 

@@ -48,6 +48,8 @@ public partial class SettingsPage : UserControl
         HistoryBox.IsChecked = Settings.KeepHistory;
         DataFolderText.Text = $"Data folder: {_services.DataDirectory}";
         VersionText.Text = $"FileOrbit {typeof(SettingsPage).Assembly.GetName().Version?.ToString(3)}";
+        AutoUpdateBox.IsChecked = Settings.CheckForUpdates;
+        ShowUpdateState(null);
         UninstallButton.Visibility = PortableInstall.IsRunningInstalledCopy() ? Visibility.Visible : Visibility.Collapsed;
         _loading = false;
     }
@@ -247,6 +249,46 @@ public partial class SettingsPage : UserControl
     }
 
     private void OnOpenData(object sender, RoutedEventArgs e) => ShellActions.OpenFolder(_services.DataDirectory);
+
+    private void ShowUpdateState(string? message)
+    {
+        var available = (Application.Current as App)?.Updates.AvailableUpdate;
+        DownloadUpdateButton.Visibility = available is null ? Visibility.Collapsed : Visibility.Visible;
+        var lastChecked = Settings.LastUpdateCheck is { } when ? $" Last checked {when.LocalDateTime:g}." : string.Empty;
+        UpdateStatus.Text = message
+            ?? (available is not null
+                ? $"FileOrbit {available.Version.ToString(3)} is available. You have {UpdateService.CurrentVersion.ToString(3)}."
+                : $"You have FileOrbit {UpdateService.CurrentVersion.ToString(3)}.{lastChecked}");
+    }
+
+    private async void OnCheckUpdates(object sender, RoutedEventArgs e)
+    {
+        if (Application.Current is not App app)
+        {
+            return;
+        }
+
+        CheckUpdatesButton.IsEnabled = false;
+        UpdateStatus.Text = "Checking for updates…";
+        try
+        {
+            var result = await app.Updates.CheckAsync(userInitiated: true);
+            ShowUpdateState(result.Message);
+        }
+        finally
+        {
+            CheckUpdatesButton.IsEnabled = true;
+        }
+    }
+
+    private void OnDownloadUpdate(object sender, RoutedEventArgs e) =>
+        UpdateService.OpenReleasePage((Application.Current as App)?.Updates.AvailableUpdate);
+
+    private void OnAutoUpdateChanged(object sender, RoutedEventArgs e)
+    {
+        Settings.CheckForUpdates = AutoUpdateBox.IsChecked == true;
+        Save();
+    }
 
     private void OnUninstall(object sender, RoutedEventArgs e)
     {

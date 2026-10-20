@@ -82,8 +82,17 @@ public static class Glyphs
         {
             ActionKind.Extract => Extract,
             ActionKind.Compress => Compress,
-            ActionKind.Transform when action.Variant == "resized" => Resize,
-            ActionKind.Transform => Compress,
+            ActionKind.Transform => action.Variant switch
+            {
+                "resized" => Resize,
+                "rotated" => "\uE7AD",
+                "cropped" or "trimmed" => "\uE7A8",
+                "monochrome" => "\uE790",
+                "enhanced" => "\uE706",
+                "nobg" => "\uE8C6",
+                "optimized" or "compressed" => Compress,
+                _ => "\uE70F",
+            },
             _ when action.Variant == "ocr" => Ocr,
             _ => ForFormat(action.Target),
         };

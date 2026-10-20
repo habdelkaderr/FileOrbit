@@ -42,9 +42,8 @@ public static class OutputPlanner
     public static string DefaultBaseName(DetectedFile input, ConversionAction action)
     {
         var baseName = PathSafety.SanitizeFileName(input.BaseName, "converted");
-        return action.Kind == ActionKind.Transform
-            ? $"{baseName} ({(action.Variant ?? "edited").ToLowerInvariant()})"
-            : baseName;
+        var suffix = action.Best.Capability.OutputSuffix ?? action.Variant ?? "edited";
+        return action.Kind == ActionKind.Transform ? $"{baseName} ({suffix})" : baseName;
     }
 
     public static OutputPlan Plan(DetectedFile input, ConversionAction action, string outputDirectory, string? baseNameOverride = null)

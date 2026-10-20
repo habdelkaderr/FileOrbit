@@ -186,9 +186,27 @@ public partial class ConversionWindow : Window
         PrivacyNote.Text = $"Runs on this PC with {_engine.Engine.DisplayName}. Nothing is uploaded.";
     }
 
+    private readonly List<(OptionDescriptor Descriptor, FrameworkElement Control)> _optionControls = [];
+
+    private void SetOption(string key, string value)
+    {
+        _optionValues[key] = value;
+        UpdateOptionVisibility();
+    }
+
+    /// <summary>Shows only the options that apply to the current choices (e.g. pixel boxes for "Width").</summary>
+    private void UpdateOptionVisibility()
+    {
+        foreach (var (descriptor, control) in _optionControls)
+        {
+            control.Visibility = descriptor.IsVisible(_optionValues) ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+
     private void BuildOptions()
     {
         OptionsPanel.Children.Clear();
+        _optionControls.Clear();
         AdvancedPanel.Children.Clear();
         _services.Settings.Presets.TryGetValue(_action.Key, out var remembered);
         foreach (var descriptor in _engine.Capability.Options)
@@ -197,8 +215,10 @@ public partial class ConversionWindow : Window
             _optionValues[descriptor.Key] = descriptor.Normalize(current);
             var control = BuildOptionControl(descriptor);
             (descriptor.IsAdvanced ? AdvancedPanel : OptionsPanel).Children.Add(control);
+            _optionControls.Add((descriptor, control));
         }
 
+        UpdateOptionVisibility();
         AdvancedExpander.Visibility = AdvancedPanel.Children.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
@@ -214,8 +234,8 @@ public partial class ConversionWindow : Window
         {
             case OptionKind.Toggle:
                 var check = new CheckBox { Content = descriptor.Label, IsChecked = value == "true", ToolTip = descriptor.Description };
-                check.Checked += (_, _) => _optionValues[descriptor.Key] = "true";
-                check.Unchecked += (_, _) => _optionValues[descriptor.Key] = "false";
+                check.Checked += (_, _) => SetOption(descriptor.Key, "true");
+                check.Unchecked += (_, _) => SetOption(descriptor.Key, "false");
                 Grid.SetColumn(check, 1);
                 grid.Children.Add(check);
                 AddDescription(grid, descriptor.Description);
@@ -226,7 +246,7 @@ public partial class ConversionWindow : Window
                 {
                     if (combo.SelectedItem is OptionChoice choice)
                     {
-                        _optionValues[descriptor.Key] = choice.Value;
+                        SetOption(descriptor.Key, choice.Value);
                         combo.ToolTip = choice.Description;
                     }
                 };
@@ -237,7 +257,7 @@ public partial class ConversionWindow : Window
                 var text = new TextBox { Text = value };
                 text.LostFocus += (_, _) =>
                 {
-                    _optionValues[descriptor.Key] = descriptor.Normalize(text.Text);
+                    SetOption(descriptor.Key, descriptor.Normalize(text.Text));
                     text.Text = _optionValues[descriptor.Key];
                 };
                 editor = text;
