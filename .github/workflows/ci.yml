@@ -54,6 +54,16 @@ jobs:
             exit 1
           }
 
+      # If the test host crashed, report which module faulted (from Windows Error Reporting) as annotations.
+      - name: Crash diagnostics
+        if: failure()
+        shell: pwsh
+        run: |
+          Get-WinEvent -LogName Application -MaxEvents 50 -ErrorAction SilentlyContinue |
+            Where-Object { $_.ProviderName -in 'Application Error', '.NET Runtime', 'Windows Error Reporting' -and $_.TimeCreated -gt (Get-Date).AddMinutes(-30) } |
+            Select-Object -First 4 |
+            ForEach-Object { $text = ($_.Message -replace "`r?`n", ' | '); Write-Host "::error::$($_.ProviderName): $($text.Substring(0, [Math]::Min(900, $text.Length)))" }
+
       # Catch packaging problems (WiX validation runs here, as the runner is elevated) before a release.
       - name: Build installer and portable zip
         shell: pwsh
