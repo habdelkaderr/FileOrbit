@@ -11,6 +11,39 @@ namespace FileOrbit.Tests.Support;
 public static class WpfHost
 {
     private static readonly Lazy<Dispatcher> Host = new(Start);
+    private static Thread? _thread;
+
+    /// <summary>
+    /// Stops the WPF thread cleanly. Without this the thread is torn down abruptly at process exit,
+    /// which can crash the test host after all tests have passed.
+    /// </summary>
+    public static void Shutdown()
+    {
+        if (!Host.IsValueCreated)
+        {
+            return;
+        }
+
+        var dispatcher = Host.Value;
+        try
+        {
+            dispatcher.Invoke(() =>
+            {
+                foreach (Window window in Application.Current.Windows.Cast<Window>().ToList())
+                {
+                    window.Close();
+                }
+
+                Application.Current.Shutdown();
+            });
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or TaskCanceledException)
+        {
+        }
+
+        dispatcher.InvokeShutdown();
+        _thread?.Join(TimeSpan.FromSeconds(10));
+    }
 
     public static void Run(Action<Application> work)
     {
@@ -62,8 +95,15 @@ public static class WpfHost
             Name = "WPF test host",
         };
         thread.SetApartmentState(ApartmentState.STA);
+        _thread = thread;
         thread.Start();
         ready.Wait();
         return dispatcher!;
     }
+}
+
+/// <summary>Runs once for the whole test assembly and shuts the shared WPF thread down at the end.</summary>
+public sealed class WpfHostFixture : IDisposable
+{
+    public void Dispose() => WpfHost.Shutdown();
 }
