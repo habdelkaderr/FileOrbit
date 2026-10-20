@@ -46,7 +46,7 @@ jobs:
           $output | Write-Host
           if ($LASTEXITCODE -ne 0) {
             # Surface failing tests (name + first message line) as annotations on the run summary.
-            $lines = @($output | ForEach-Object { "$_" -replace "\[[0-9;]*m", "" })
+            $lines = @($output | ForEach-Object { "$_" -replace "`e\[[0-9;]*m", "" })
             for ($i = 0; $i -lt $lines.Count; $i++) {
               if ($lines[$i] -match '^\s*failed ') { Write-Host "::error::$($lines[$i].Trim()) -- $(($lines[($i+1)..($i+3)] -join ' ').Trim())" }
             }
