@@ -40,4 +40,15 @@ jobs:
       # Microsoft Office is not available on hosted runners; those tests skip themselves when Office is
       # missing, and the trait filter keeps the run fast.
       - name: Test
-        run: dotnet test --no-build -c Release -- --filter-not-trait "Category=Office"
+        shell: pwsh
+        run: |
+          $output = dotnet test --no-build -c Release -- --filter-not-trait "Category=Office" 2>&1
+          $output | Write-Host
+          if ($LASTEXITCODE -ne 0) {
+            # Surface failing tests (name + first message line) as annotations on the run summary.
+            $lines = @($output | ForEach-Object { "$_" })
+            for ($i = 0; $i -lt $lines.Count; $i++) {
+              if ($lines[$i] -match '^failed ') { Write-Host "::error::$($lines[$i].Trim()) -- $(($lines[($i+1)..($i+3)] -join ' ').Trim())" }
+            }
+            exit 1
+          }
