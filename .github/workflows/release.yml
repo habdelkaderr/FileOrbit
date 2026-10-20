@@ -38,7 +38,7 @@ jobs:
         run: ./build/Build-Installer.ps1
 
       - name: Attest build provenance
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             artifacts/FileOrbit-*-x64.msi
