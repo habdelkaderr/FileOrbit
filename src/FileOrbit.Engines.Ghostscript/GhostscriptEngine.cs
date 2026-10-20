@@ -10,7 +10,7 @@ namespace FileOrbit.Engines.Ghostscript;
 /// </summary>
 public sealed class GhostscriptEngine : ConversionEngineBase
 {
-    public const string EngineId = "ghostscript";
+    public const string EngineId = KnownTools.GhostscriptEngineId;
     private readonly ExecutableLocator _locator;
     private string? _executable;
 
@@ -24,29 +24,13 @@ public sealed class GhostscriptEngine : ConversionEngineBase
 
     public override bool IsExternal => true;
 
-    public override DependencyInfo Dependency { get; } = new(
-        "Ghostscript",
-        "PDF optimisation (smaller files) and PDF/A archival conversion",
-        "GNU AGPL 3.0 (or commercial licence from Artifex)",
-        "https://ghostscript.com/releases/gsdnld.html",
-        // Ghostscript is not in the winget catalog, so the Engines page guides a manual download instead.
-        InstallSteps:
-        [
-            "Click “Download Ghostscript”. Your browser opens the official Ghostscript download page.",
-            "Under “Ghostscript AGPL Release”, download the installer for Windows (64 bit).",
-            "Run the downloaded file and keep the default options.",
-            "Come back here and click “Check again”. PDFs then get Optimize and PDF/A in the FileOrbit menu.",
-        ]);
+    public override DependencyInfo Dependency => KnownTools.Ghostscript;
 
     public TimeSpan Timeout { get; init; } = TimeSpan.FromMinutes(15);
 
     protected override EngineStatus CheckStatus()
     {
-        _executable = _locator.Find(Id, "gswin64c.exe",
-        [
-            @"%ProgramFiles%\gs\gs*\bin\gswin64c.exe",
-            @"%ProgramFiles(x86)%\gs\gs*\bin\gswin32c.exe",
-        ]);
+        _executable = KnownTools.FindGhostscript(_locator);
         if (_executable is null)
         {
             return EngineStatus.Unavailable("Ghostscript is not installed.");

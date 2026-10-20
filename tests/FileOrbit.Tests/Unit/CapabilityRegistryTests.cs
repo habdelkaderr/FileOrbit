@@ -198,6 +198,19 @@ public sealed class EnginePluginTests
     }
 
     [Fact]
+    public void Skipped_plugin_is_never_loaded()
+    {
+        using var dir = new TestDirectory();
+        dir.Write("FileOrbit.Engines.Broken.dll", [0x4D, 0x5A, 0x00, 0x01, 0x02]);
+
+        var (engines, problems) = EnginePlugins.Load(dir.Path, new FileOrbit.Engines.Processes.ExecutableLocator(), _ => false);
+
+        // A broken file would be reported if it were opened; skipping means Windows never evaluates it.
+        Assert.Empty(engines);
+        Assert.Empty(problems);
+    }
+
+    [Fact]
     public void Missing_plugin_folder_is_fine()
     {
         var (engines, problems) = EnginePlugins.Load(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")), new FileOrbit.Engines.Processes.ExecutableLocator());

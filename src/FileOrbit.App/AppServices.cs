@@ -192,6 +192,12 @@ public sealed class AppServices : IDisposable
             Log?.Warn("Engine plugin not loaded", ("plugin", problem.AssemblyName), ("reason", problem.Reason));
         }
 
+        if (!engines.Any(e => e.Id == Engines.Processes.KnownTools.GhostscriptEngineId))
+        {
+            // Ghostscript not installed: keep it discoverable without loading the plugin.
+            engines = [.. engines, new AddOns.GhostscriptPlaceholder()];
+        }
+
         return new CapabilityRegistry(Formats, engines);
     }
 }

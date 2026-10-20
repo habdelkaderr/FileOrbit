@@ -16,7 +16,11 @@ public static class EnginePlugins
 {
     public const string SearchPattern = "FileOrbit.Engines.*.dll";
 
-    public static (IReadOnlyList<IConversionEngine> Engines, IReadOnlyList<PluginProblem> Problems) Load(string directory, ExecutableLocator locator)
+    /// <param name="shouldLoad">
+    /// Decides per plugin (by file name without extension) whether to load it. Plugins whose tool is not
+    /// installed are skipped, so Windows never evaluates or blocks code that could not be used anyway.
+    /// </param>
+    public static (IReadOnlyList<IConversionEngine> Engines, IReadOnlyList<PluginProblem> Problems) Load(string directory, ExecutableLocator locator, Func<string, bool>? shouldLoad = null)
     {
         var engines = new List<IConversionEngine>();
         var problems = new List<PluginProblem>();
@@ -28,6 +32,11 @@ public static class EnginePlugins
         foreach (var path in Directory.EnumerateFiles(directory, SearchPattern).Order(StringComparer.OrdinalIgnoreCase))
         {
             var name = Path.GetFileNameWithoutExtension(path);
+            if (shouldLoad is not null && !shouldLoad(name))
+            {
+                continue;
+            }
+
             try
             {
                 var assembly = Assembly.LoadFrom(path);

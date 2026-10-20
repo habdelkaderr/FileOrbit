@@ -25,7 +25,9 @@ public static class EngineCatalog
         IReadOnlyDictionary<string, string>? enginePathOverrides, string pluginDirectory)
     {
         var locator = new ExecutableLocator(enginePathOverrides);
-        var (plugins, problems) = EnginePlugins.Load(pluginDirectory, locator);
+        // The Ghostscript plugin is only useful (and only loaded) when Ghostscript itself is installed.
+        var (plugins, problems) = EnginePlugins.Load(pluginDirectory, locator, name =>
+            !name.Equals(KnownTools.GhostscriptPlugin, StringComparison.OrdinalIgnoreCase) || KnownTools.FindGhostscript(locator) is not null);
         return ([.. CreateBuiltIn(locator), .. plugins], problems);
     }
 
