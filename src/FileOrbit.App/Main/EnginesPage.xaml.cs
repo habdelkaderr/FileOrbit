@@ -18,9 +18,9 @@ public sealed class EngineRow
         var status = engine.GetStatus();
         IsAvailable = status.IsAvailable;
         Status = status.IsAvailable
-            ? $"{status.Summary}{(status.Version is null ? string.Empty : $" Â· version {status.Version}")} Â· {availableActions} of {totalActions} conversions"
+            ? $"{status.Summary}{(status.Version is null ? string.Empty : $" · version {status.Version}")} · {availableActions} of {totalActions} conversions"
             : $"{status.Summary} {totalActions} conversions need it.";
-        Details = string.Join("  Â·  ", new[]
+        Details = string.Join("  ·  ", new[]
         {
             status.Location is null ? null : $"Location: {status.Location}",
             engine.Dependency is null ? null : $"Provides: {engine.Dependency.Purpose}",
@@ -122,7 +122,7 @@ public partial class EnginesPage : UserControl
             }
 
             Process.Start(info)?.Dispose();
-            MessageBox.Show(Window.GetWindow(this), "When the installation finishes, press â€œCheck againâ€.", "FileOrbit", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(Window.GetWindow(this), "When the installation has finished, click “Check again” to start using it.", "FileOrbit", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (System.ComponentModel.Win32Exception ex)
         {
