@@ -5,3 +5,9 @@ artifacts/
 *.user
 TestResults/
 *.binlog
+
+# Scratch documents dropped into the repo root while trying the app
+/*.pdf
+/*.xlsx
+/*.docx
+/*.pptx
