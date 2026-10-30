@@ -3,8 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,24,24">
         <StackPanel MaxWidth="820" HorizontalAlignment="Left">
-            <Border x:Name="UpdateBanner" Visibility="Collapsed" CornerRadius="8" Padding="16,10" Margin="0,0,0,16"
-                    Background="{DynamicResource OrbitAccentSoftBrush}" BorderBrush="{DynamicResource OrbitAccentBrush}" BorderThickness="1">
+            <Border x:Name="UpdateBanner" Visibility="Collapsed" CornerRadius="10" Padding="16,10" Margin="0,0,0,16"
+                    Background="{DynamicResource MacAccentSoftBrush}">
                 <DockPanel>
                     <Button DockPanel.Dock="Right" Content="See what's new" Click="OnUpdateBanner" VerticalAlignment="Center" />
                     <TextBlock x:Name="UpdateBannerText" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,12,0" />
@@ -14,22 +14,24 @@
             <TextBlock Style="{StaticResource PageSubtitle}"
                        Text="Pick a file and FileOrbit shows every conversion it can really perform, in a ring around the file. Everything runs on this PC." />
 
-            <Border CornerRadius="10" BorderThickness="2" BorderBrush="{DynamicResource OrbitSeparatorBrush}" Padding="24"
-                    Background="{DynamicResource OrbitBadgeBrush}">
-                <Grid>
+            <Grid>
+                <!-- Dashed drop zone, Finder style. -->
+                <Rectangle RadiusX="14" RadiusY="14" Fill="{DynamicResource MacGroupBrush}" Stroke="{DynamicResource MacSeparatorBrush}"
+                           StrokeThickness="1.5" StrokeDashArray="5 3" SnapsToDevicePixels="True" />
+                <Grid Margin="26,24">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="&#xE898;" Style="{StaticResource Glyph}" FontSize="36" VerticalAlignment="Center" Foreground="{DynamicResource OrbitAccentBrush}" />
+                    <TextBlock Text="&#xE898;" Style="{StaticResource Glyph}" FontSize="36" VerticalAlignment="Center" Foreground="{DynamicResource MacAccentBrush}" />
                     <StackPanel Grid.Column="1" Margin="20,0" VerticalAlignment="Center">
                         <TextBlock Text="Drop files or folders anywhere on this window" FontSize="15" FontWeight="SemiBold" />
                         <TextBlock Style="{StaticResource Subtle}" Text="Or choose files to open the radial menu." Margin="0,2,0,0" />
                     </StackPanel>
                     <Button Grid.Column="2" Content="Choose files…" Click="OnBrowse" Style="{DynamicResource AccentButtonStyle}" MinWidth="120" />
                 </Grid>
-            </Border>
+            </Grid>
 
             <TextBlock Text="Other ways to start" Style="{StaticResource SectionTitle}" />
             <UniformGrid Columns="2">

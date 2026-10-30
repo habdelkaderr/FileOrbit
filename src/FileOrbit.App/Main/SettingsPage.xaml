@@ -41,7 +41,7 @@
                                  ToolTip="Click here and press the new shortcut" />
                         <TextBlock Grid.Column="1" Style="{StaticResource Subtle}" Margin="10,0,0,0" VerticalAlignment="Center" Text="Click the box and press a new combination." />
                     </Grid>
-                    <TextBlock x:Name="HotkeyError" Margin="26,4,0,0" Foreground="{DynamicResource OrbitErrorBrush}" TextWrapping="Wrap" />
+                    <TextBlock x:Name="HotkeyError" Margin="26,4,0,0" Foreground="{DynamicResource MacErrorBrush}" TextWrapping="Wrap" />
                     <TextBlock Style="{StaticResource Subtle}" Margin="26,2,0,12"
                                Text="Select files in File Explorer (or on the desktop) and press the shortcut to open the menu. Without a selection it asks for a file." />
                     <CheckBox x:Name="TrayBox" Content="Keep running in the notification area (faster menu, enables the shortcut)" Click="OnTrayChanged" />
@@ -102,7 +102,7 @@
             <Border Style="{StaticResource Card}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="&#xEA18;" Style="{StaticResource Glyph}" FontSize="16" Foreground="{DynamicResource OrbitSuccessBrush}" VerticalAlignment="Center" />
+                        <TextBlock Text="&#xEA18;" Style="{StaticResource Glyph}" FontSize="16" Foreground="{DynamicResource MacSuccessBrush}" VerticalAlignment="Center" />
                         <TextBlock Text="All conversions run on this PC." FontWeight="SemiBold" Margin="10,0,0,0" />
                     </StackPanel>
                     <TextBlock Style="{StaticResource Subtle}" Margin="26,2,0,12"

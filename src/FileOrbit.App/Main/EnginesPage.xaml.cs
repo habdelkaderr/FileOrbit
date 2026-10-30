@@ -59,7 +59,7 @@ public sealed class EngineRow
 
     public string StatusGlyph => IsAvailable ? Glyphs.Check : Glyphs.Warning;
 
-    public Brush StatusBrush => (Brush)Application.Current.FindResource(IsAvailable ? "OrbitSuccessBrush" : "OrbitWarningBrush");
+    public Brush StatusBrush => (Brush)Application.Current.FindResource(IsAvailable ? "MacSuccessBrush" : "MacWarningBrush");
 
     public bool CanInstall => !IsAvailable && Engine.Dependency?.WingetId is not null;
 

@@ -42,6 +42,20 @@ jobs:
         shell: pwsh
         run: ./build/Run-Tests.ps1
 
+      # Renders every window off-screen (light and dark) so UI changes can be reviewed from the run's artifacts.
+      - name: Render UI snapshots
+        shell: pwsh
+        run: |
+          $env:FILEORBIT_SNAPSHOT_DIR = Join-Path $PWD 'artifacts/ui-snapshots'
+          dotnet test --no-build -c Release -- --filter-class FileOrbit.Tests.Visual.UiSnapshotTests
+
+      - name: Upload UI snapshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-snapshots
+          path: artifacts/ui-snapshots
+          retention-days: 14
+
       # If the test host crashed, report which module faulted (from Windows Error Reporting) as annotations.
       - name: Crash diagnostics
         if: failure()

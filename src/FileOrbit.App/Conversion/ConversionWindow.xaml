@@ -8,22 +8,30 @@
         WindowStartupLocation="Manual"
         ShowInTaskbar="True"
         UseLayoutRounding="True"
-        FontFamily="Segoe UI Variable Text, Segoe UI"
+        Background="{DynamicResource MacWindowBrush}"
+        Foreground="{DynamicResource MacLabelBrush}"
+        FontFamily="SF Pro Text, Segoe UI Variable Text, Segoe UI"
+        FontSize="13"
         Icon="pack://application:,,,/FileOrbit;component/Assets/FileOrbit.ico">
     <Window.Resources>
-        <Style x:Key="Caption" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="12" />
-            <Setter Property="Opacity" Value="0.72" />
-            <Setter Property="TextWrapping" Value="Wrap" />
-        </Style>
-        <Style x:Key="FieldLabel" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="12.5" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Margin" Value="0,0,12,0" />
-        </Style>
-        <Style x:Key="GlyphText" TargetType="TextBlock">
-            <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
-        </Style>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/FileOrbit;component/Themes/Apple.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <Style x:Key="Caption" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="Foreground" Value="{DynamicResource MacSecondaryLabelBrush}" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+            <Style x:Key="FieldLabel" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="12.5" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Margin" Value="0,0,12,0" />
+            </Style>
+            <Style x:Key="GlyphText" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
+            </Style>
+        </ResourceDictionary>
     </Window.Resources>
 
     <Grid Margin="22,18,22,18">
@@ -54,7 +62,7 @@
                 <TextBlock x:Name="SourceMeta" Style="{StaticResource Caption}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
             </StackPanel>
             <TextBlock Grid.Column="2" Text="&#xE72A;" Style="{StaticResource GlyphText}" FontSize="14" Opacity="0.6" VerticalAlignment="Center" Margin="12,0" />
-            <Border Grid.Column="3" CornerRadius="8" Padding="12,6" Background="{DynamicResource OrbitAccentSoftBrush}" VerticalAlignment="Center">
+            <Border Grid.Column="3" CornerRadius="15" Padding="12,5" Background="{DynamicResource MacAccentSoftBrush}" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock x:Name="TargetGlyph" Style="{StaticResource GlyphText}" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0" />
                     <TextBlock x:Name="TargetName" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
@@ -63,7 +71,8 @@
         </Grid>
 
         <!-- Fidelity / caveats -->
-        <Border Grid.Row="1" Margin="0,14,0,0" CornerRadius="6" Padding="12,9" Background="{DynamicResource OrbitBadgeBrush}">
+        <Border Grid.Row="1" Margin="0,14,0,0" CornerRadius="10" Padding="12,9" Background="{DynamicResource MacGroupBrush}"
+                BorderBrush="{DynamicResource MacGroupBorderBrush}" BorderThickness="1">
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock x:Name="FidelityGlyph" Style="{StaticResource GlyphText}" FontSize="13" VerticalAlignment="Center" Margin="0,0,8,0" />
@@ -75,8 +84,8 @@
         </Border>
 
         <!-- Batch list -->
-        <Border x:Name="BatchPanel" Grid.Row="2" Margin="0,12,0,0" Visibility="Collapsed" BorderThickness="1" CornerRadius="6"
-                BorderBrush="{DynamicResource OrbitSeparatorBrush}">
+        <Border x:Name="BatchPanel" Grid.Row="2" Margin="0,12,0,0" Visibility="Collapsed" BorderThickness="1" CornerRadius="10"
+                BorderBrush="{DynamicResource MacGroupBorderBrush}" Background="{DynamicResource MacGroupBrush}">
             <ScrollViewer MaxHeight="210" VerticalScrollBarVisibility="Auto">
                 <ItemsControl x:Name="BatchList" Margin="4">
                     <ItemsControl.ItemTemplate>
@@ -148,11 +157,11 @@
                 <TextBlock Text="If it exists" Style="{StaticResource FieldLabel}" />
                 <StackPanel Grid.Column="1">
                     <ComboBox x:Name="CollisionBox" SelectionChanged="OnCollisionChanged" AutomationProperties.Name="When the output already exists" />
-                    <TextBlock x:Name="ConflictText" Style="{StaticResource Caption}" Margin="0,4,0,0" Foreground="{DynamicResource OrbitWarningBrush}" Opacity="1" />
+                    <TextBlock x:Name="ConflictText" Style="{StaticResource Caption}" Margin="0,4,0,0" Foreground="{DynamicResource MacWarningBrush}" Opacity="1" />
                 </StackPanel>
             </Grid>
 
-            <TextBlock x:Name="SetupError" Margin="0,10,0,0" Foreground="{DynamicResource OrbitErrorBrush}" TextWrapping="Wrap" Visibility="Collapsed" />
+            <TextBlock x:Name="SetupError" Margin="0,10,0,0" Foreground="{DynamicResource MacErrorBrush}" TextWrapping="Wrap" Visibility="Collapsed" />
         </StackPanel>
 
         <!-- Password -->
@@ -190,7 +199,7 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal" Margin="0,2">
-                            <TextBlock Text="&#xE7BA;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="12" Foreground="{DynamicResource OrbitWarningBrush}" Margin="0,2,8,0" VerticalAlignment="Top" />
+                            <TextBlock Text="&#xE7BA;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="12" Foreground="{DynamicResource MacWarningBrush}" Margin="0,2,8,0" VerticalAlignment="Top" />
                             <TextBlock Text="{Binding}" TextWrapping="Wrap" FontSize="12" MaxWidth="400" />
                         </StackPanel>
                     </DataTemplate>

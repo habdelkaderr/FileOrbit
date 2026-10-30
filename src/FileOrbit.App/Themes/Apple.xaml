@@ -1,0 +1,172 @@
+<!--
+    Apple-style look for the main window and the conversion card: macOS-like push buttons, a blue default
+    button, rounded checkboxes and a source-list sidebar. Merged into those windows only, so the radial
+    menu keeps its own look. Colours come from the Mac* keys in Theming/Palette*.xaml (light and dark).
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Apple system blue for the standard (Fluent) controls: focus lines, progress bars, selections. -->
+    <SolidColorBrush x:Key="AccentFillColorDefaultBrush" Color="#FF007AFF" />
+    <SolidColorBrush x:Key="AccentFillColorSecondaryBrush" Color="#E6007AFF" />
+    <SolidColorBrush x:Key="AccentFillColorTertiaryBrush" Color="#CC007AFF" />
+    <SolidColorBrush x:Key="AccentFillColorSelectedTextBackgroundBrush" Color="#FF007AFF" />
+    <SolidColorBrush x:Key="AccentTextFillColorPrimaryBrush" Color="#FF0A84FF" />
+    <SolidColorBrush x:Key="AccentTextFillColorSecondaryBrush" Color="#FF0A84FF" />
+    <SolidColorBrush x:Key="AccentTextFillColorTertiaryBrush" Color="#FF0A84FF" />
+    <CornerRadius x:Key="ControlCornerRadius">6</CornerRadius>
+    <CornerRadius x:Key="OverlayCornerRadius">10</CornerRadius>
+
+    <!-- Push button -->
+    <Style x:Key="MacButtonStyle" TargetType="Button">
+        <Setter Property="Foreground" Value="{DynamicResource MacLabelBrush}" />
+        <Setter Property="Background" Value="{DynamicResource MacControlBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource MacControlBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="14,4" />
+        <Setter Property="MinHeight" Value="28" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="FocusRing" Margin="-3" CornerRadius="9" BorderThickness="3"
+                                BorderBrush="{DynamicResource MacFocusRingBrush}" Visibility="Collapsed" />
+                        <Border x:Name="Chrome" CornerRadius="6"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" />
+                        <ContentPresenter Margin="{TemplateBinding Padding}" RecognizesAccessKey="True"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="FocusRing" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource MacControlHoverBrush}" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="{DynamicResource MacControlPressedBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style TargetType="Button" BasedOn="{StaticResource MacButtonStyle}" />
+
+    <!-- Default (blue) button. Replaces the Fluent accent button used by the pages. -->
+    <Style x:Key="AccentButtonStyle" TargetType="Button" BasedOn="{StaticResource MacButtonStyle}">
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Background" Value="{DynamicResource MacAccentBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource MacAccentHoverBrush}" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="{DynamicResource MacAccentPressedBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Checkbox: rounded square, filled blue with a white tick when checked. -->
+    <Style TargetType="CheckBox">
+        <Setter Property="Foreground" Value="{DynamicResource MacLabelBrush}" />
+        <Setter Property="Background" Value="{DynamicResource MacControlBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource MacControlBorderBrush}" />
+        <Setter Property="Padding" Value="8,0,0,0" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <Grid Background="Transparent">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid Width="16" Height="16" VerticalAlignment="Center">
+                            <Border x:Name="FocusRing" Margin="-3" CornerRadius="7" BorderThickness="3"
+                                    BorderBrush="{DynamicResource MacFocusRingBrush}" Visibility="Collapsed" />
+                            <Border x:Name="Box" CornerRadius="4" BorderThickness="1"
+                                    Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" />
+                            <Path x:Name="Mark" Data="M 4,8.5 L 7,11.5 L 12.5,5" Stroke="White" StrokeThickness="2"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Visibility="Collapsed" />
+                            <Rectangle x:Name="Dash" Width="8" Height="2" RadiusX="1" RadiusY="1" Fill="White" Visibility="Collapsed" />
+                        </Grid>
+                        <ContentPresenter Grid.Column="1" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" VerticalAlignment="Center" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Box" Property="Background" Value="{DynamicResource MacAccentBrush}" />
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource MacAccentBrush}" />
+                            <Setter TargetName="Mark" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="{x:Null}">
+                            <Setter TargetName="Box" Property="Background" Value="{DynamicResource MacAccentBrush}" />
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource MacAccentBrush}" />
+                            <Setter TargetName="Dash" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Box" Property="Opacity" Value="0.75" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="FocusRing" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Sidebar (source list) row: rounded highlight, blue with white text when selected. -->
+    <Style x:Key="SidebarItemStyle" TargetType="ListBoxItem">
+        <Setter Property="Foreground" Value="{DynamicResource MacLabelBrush}" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="Margin" Value="0,1" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Grid>
+                        <Border x:Name="FocusRing" Margin="-2" CornerRadius="8" BorderThickness="2"
+                                BorderBrush="{DynamicResource MacFocusRingBrush}" Visibility="Collapsed" />
+                        <Border x:Name="Row" CornerRadius="6" Background="Transparent" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Row" Property="Background" Value="{DynamicResource MacSidebarHoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Row" Property="Background" Value="{DynamicResource MacAccentBrush}" />
+                            <Setter Property="Foreground" Value="White" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="FocusRing" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

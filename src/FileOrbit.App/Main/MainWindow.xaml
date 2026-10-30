@@ -6,52 +6,58 @@
         WindowStartupLocation="CenterScreen"
         AllowDrop="True"
         UseLayoutRounding="True"
-        FontFamily="Segoe UI Variable Text, Segoe UI"
+        Background="{DynamicResource MacWindowBrush}"
+        Foreground="{DynamicResource MacLabelBrush}"
+        FontFamily="SF Pro Text, Segoe UI Variable Text, Segoe UI"
+        FontSize="13"
         Icon="pack://application:,,,/FileOrbit;component/Assets/FileOrbit.ico">
+    <Window.Resources>
+        <ResourceDictionary Source="pack://application:,,,/FileOrbit;component/Themes/Apple.xaml" />
+    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="220" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <!-- Navigation -->
-        <DockPanel Margin="10,12,6,12">
-            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="10,4,0,18">
-                <Image Source="pack://application:,,,/FileOrbit;component/Assets/FileOrbit.png" Width="28" Height="28" RenderOptions.BitmapScalingMode="HighQuality" />
-                <TextBlock Text="FileOrbit" FontSize="17" FontWeight="SemiBold" VerticalAlignment="Center" Margin="10,0,0,0" />
-            </StackPanel>
-            <Border DockPanel.Dock="Bottom" CornerRadius="6" Padding="10,8" Margin="4,8,4,0" Background="{DynamicResource OrbitBadgeBrush}"
-                    ToolTip="FileOrbit converts files with software on this PC. Files are never uploaded and there is no telemetry.">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="&#xEA18;" Style="{StaticResource Glyph}" FontSize="14" Foreground="{DynamicResource OrbitSuccessBrush}" VerticalAlignment="Center" />
-                    <TextBlock Text="Processed locally" FontSize="12" Margin="8,0,0,0" VerticalAlignment="Center" />
+        <!-- Sidebar -->
+        <Border Background="{DynamicResource MacSidebarBrush}" BorderBrush="{DynamicResource MacSeparatorBrush}" BorderThickness="0,0,1,0">
+            <DockPanel Margin="10,14,10,12">
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="8,2,0,20">
+                    <Image Source="pack://application:,,,/FileOrbit;component/Assets/FileOrbit.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" />
+                    <TextBlock Text="FileOrbit" FontSize="17" FontWeight="Bold" VerticalAlignment="Center" Margin="10,0,0,0" />
                 </StackPanel>
-            </Border>
-            <ListBox x:Name="Nav" BorderThickness="0" Background="Transparent" SelectionChanged="OnNavigate"
-                     AutomationProperties.Name="Navigation">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal" Margin="4,6">
-                            <TextBlock Text="{Binding Glyph}" Style="{StaticResource Glyph}" FontSize="16" VerticalAlignment="Center" Width="22" />
-                            <TextBlock Text="{Binding Title}" FontSize="13.5" Margin="10,0,0,0" VerticalAlignment="Center" />
-                            <Border Background="{DynamicResource OrbitAccentStrongBrush}" CornerRadius="8" Padding="6,0" Margin="8,0,0,0"
-                                    VerticalAlignment="Center" Visibility="{Binding BadgeVisibility}">
-                                <TextBlock Text="{Binding Badge}" FontSize="11" Foreground="White" />
-                            </Border>
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-        </DockPanel>
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="10,8,4,0"
+                            ToolTip="FileOrbit converts files with software on this PC. Files are never uploaded and there is no telemetry.">
+                    <TextBlock Text="&#xEA18;" Style="{StaticResource Glyph}" FontSize="13" Foreground="{DynamicResource MacSuccessBrush}" VerticalAlignment="Center" />
+                    <TextBlock Text="Processed locally" FontSize="12" Foreground="{DynamicResource MacSecondaryLabelBrush}" Margin="7,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+                <ListBox x:Name="Nav" BorderThickness="0" Background="Transparent" Padding="0" SelectionChanged="OnNavigate"
+                         ItemContainerStyle="{StaticResource SidebarItemStyle}"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         AutomationProperties.Name="Navigation">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Right" Text="{Binding Badge}" FontSize="12" Opacity="0.75" VerticalAlignment="Center"
+                                           Visibility="{Binding BadgeVisibility}" />
+                                <TextBlock Text="{Binding Glyph}" Style="{StaticResource Glyph}" FontSize="15" VerticalAlignment="Center" Width="20" />
+                                <TextBlock Text="{Binding Title}" FontSize="13" Margin="9,0,0,0" VerticalAlignment="Center" />
+                            </DockPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Border>
 
         <!-- Page host -->
-        <ContentControl x:Name="PageHost" Grid.Column="1" Margin="12,8,0,0" Focusable="False" />
+        <ContentControl x:Name="PageHost" Grid.Column="1" Margin="28,22,0,0" Focusable="False" />
 
         <!-- Drop overlay -->
-        <Border x:Name="DropOverlay" Grid.ColumnSpan="2" Visibility="Collapsed" Background="{DynamicResource OrbitAccentSoftBrush}"
-                BorderBrush="{DynamicResource OrbitAccentBrush}" BorderThickness="2" CornerRadius="8" Margin="8" IsHitTestVisible="False">
+        <Border x:Name="DropOverlay" Grid.ColumnSpan="2" Visibility="Collapsed" Background="{DynamicResource MacAccentSoftBrush}"
+                BorderBrush="{DynamicResource MacAccentBrush}" BorderThickness="2" CornerRadius="12" Margin="8" IsHitTestVisible="False">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock Text="&#xE896;" Style="{StaticResource Glyph}" FontSize="40" HorizontalAlignment="Center" />
+                <TextBlock Text="&#xE896;" Style="{StaticResource Glyph}" FontSize="40" HorizontalAlignment="Center" Foreground="{DynamicResource MacAccentBrush}" />
                 <TextBlock Text="Drop to open the FileOrbit menu" FontSize="18" FontWeight="SemiBold" Margin="0,12,0,0" />
             </StackPanel>
         </Border>

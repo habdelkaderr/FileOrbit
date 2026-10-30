@@ -171,12 +171,12 @@ public partial class ConversionWindow : Window
         var capability = _engine.Capability;
         var (glyph, title, brush) = capability.Fidelity switch
         {
-            Fidelity.Lossless => (Glyphs.Check, "Lossless", "OrbitSuccessBrush"),
-            Fidelity.Repackage => (Glyphs.Check, "Contents are kept unchanged", "OrbitSuccessBrush"),
-            Fidelity.Lossy => (Glyphs.Warning, "Lossy: smaller files, some quality loss", "OrbitWarningBrush"),
-            Fidelity.Extraction => (Glyphs.Warning, "Extracts content only; layout is not preserved", "OrbitWarningBrush"),
-            Fidelity.LayoutSensitive => (Glyphs.Warning, "Layout is recreated and may differ from the original", "OrbitWarningBrush"),
-            _ => (Glyphs.Warning, "Converted to pictures; text will not be editable", "OrbitWarningBrush"),
+            Fidelity.Lossless => (Glyphs.Check, "Lossless", "MacSuccessBrush"),
+            Fidelity.Repackage => (Glyphs.Check, "Contents are kept unchanged", "MacSuccessBrush"),
+            Fidelity.Lossy => (Glyphs.Warning, "Lossy: smaller files, some quality loss", "MacWarningBrush"),
+            Fidelity.Extraction => (Glyphs.Warning, "Extracts content only; layout is not preserved", "MacWarningBrush"),
+            Fidelity.LayoutSensitive => (Glyphs.Warning, "Layout is recreated and may differ from the original", "MacWarningBrush"),
+            _ => (Glyphs.Warning, "Converted to pictures; text will not be editable", "MacWarningBrush"),
         };
         FidelityGlyph.Text = glyph;
         FidelityGlyph.SetResourceReference(ForegroundProperty, brush);
@@ -489,7 +489,7 @@ public partial class ConversionWindow : Window
         if (!finished)
         {
             StatusGlyph.Text = Glyphs.Refresh;
-            StatusGlyph.SetResourceReference(ForegroundProperty, "OrbitAccentBrush");
+            StatusGlyph.SetResourceReference(ForegroundProperty, "MacAccentBrush");
             StatusText.Text = IsBatch
                 ? $"Converting {_jobs.Count(j => j.IsFinished) + 1} of {_jobs.Count}…"
                 : running is null ? "Waiting to start…" : $"{_action.Verb}…";
@@ -524,7 +524,7 @@ public partial class ConversionWindow : Window
         if (failed.Count == 0 && cancelled.Count == 0)
         {
             StatusGlyph.Text = Glyphs.Check;
-            StatusGlyph.SetResourceReference(ForegroundProperty, "OrbitSuccessBrush");
+            StatusGlyph.SetResourceReference(ForegroundProperty, "MacSuccessBrush");
             StatusText.Text = IsBatch ? $"Converted {succeeded.Count} of {_jobs.Count} files" : succeeded.FirstOrDefault()?.Message ?? "Done";
             StageText.Text = IsBatch ? string.Empty : succeeded.FirstOrDefault()?.PrimaryOutput ?? string.Empty;
             var primary = succeeded.FirstOrDefault()?.PrimaryOutput;
@@ -538,7 +538,7 @@ public partial class ConversionWindow : Window
 
         var allCancelled = failed.Count == 0;
         StatusGlyph.Text = allCancelled ? Glyphs.Cancel : Glyphs.Error;
-        StatusGlyph.SetResourceReference(ForegroundProperty, allCancelled ? "OrbitSubtleTextBrush" : "OrbitErrorBrush");
+        StatusGlyph.SetResourceReference(ForegroundProperty, allCancelled ? "MacSecondaryLabelBrush" : "MacErrorBrush");
         StatusText.Text = IsBatch
             ? $"{succeeded.Count} converted, {failed.Count} failed{(cancelled.Count > 0 ? $", {cancelled.Count} cancelled" : string.Empty)}"
             : (failed.FirstOrDefault() ?? cancelled.First()).Message ?? "The conversion did not complete.";
