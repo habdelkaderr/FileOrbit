@@ -200,7 +200,8 @@ software silently.
 ### Requirements
 
 - Windows 10 2004 (build 19041) or later, x64
-- .NET 10 SDK (pinned in `global.json`)
+- .NET 10 SDK, exactly the version in `global.json`. The NuGet lock files depend on it, so when you
+  move to a newer SDK, update `global.json` and run `dotnet restore --force-evaluate` in the same commit.
 - Optional, for the integration tests that use them: Microsoft Office, 7-Zip
 
 ### Build and run
