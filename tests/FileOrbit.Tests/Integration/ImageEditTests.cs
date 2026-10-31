@@ -202,6 +202,12 @@ public sealed class ImageEditTests
         Assert.Equal((640, 480), (result.Width, result.Height));
         Assert.True(ImageOps.PixelAt(result, 320, 240).A > 200, "the subject stays opaque");
         Assert.True(ImageOps.PixelAt(result, 10, 10).A < 60, "the background becomes transparent");
+
+        // An idle FileOrbit unloads the model; the next removal must load it again and work the same.
+        BackgroundRemovalEngine.ReleaseModel();
+        var again = await P.ConvertAsync(path, "transform:png:nobg");
+        var second = await Read(again.PrimaryOutput!);
+        Assert.True(ImageOps.PixelAt(second, 320, 240).A > 200, "the subject stays opaque after reloading the model");
     }
 
     [Fact]

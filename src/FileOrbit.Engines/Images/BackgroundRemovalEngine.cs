@@ -21,7 +21,9 @@ public sealed class BackgroundRemovalEngine : ConversionEngineBase
     private const int MaxWorkingDimension = 6000;
 
     private static readonly string[] Sources = ["png", "jpeg", "webp", "bmp", "tiff", "gif", "heic", "avif"];
-    private static readonly Lazy<InferenceSession> Session = new(CreateSession, LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lock SessionLock = new();
+    private static InferenceSession? _session;
+    private static int _sessionUsers;
 
     public override string Id => EngineId;
 
@@ -106,7 +108,8 @@ public sealed class BackgroundRemovalEngine : ConversionEngineBase
     internal static float[] PredictMask(RasterImage image, bool sharpEdges)
     {
         var input = PrepareInput(image);
-        var session = Session.Value;
+        using var lease = SessionLease.Acquire();
+        var session = lease.Session;
         var inputName = session.InputMetadata.Keys.First();
         using var results = session.Run([NamedOnnxValue.CreateFromTensor(inputName, input)]);
         var output = results.First().AsTensor<float>();
@@ -183,6 +186,48 @@ public sealed class BackgroundRemovalEngine : ConversionEngineBase
         }
 
         return tensor;
+    }
+
+    /// <summary>
+    /// Unloads the model and ONNX Runtime's buffers while no conversion is using them, so an idle FileOrbit
+    /// does not keep them in memory. The model is loaded again on next use.
+    /// </summary>
+    public static void ReleaseModel()
+    {
+        lock (SessionLock)
+        {
+            if (_sessionUsers == 0)
+            {
+                _session?.Dispose();
+                _session = null;
+            }
+        }
+    }
+
+    /// <summary>Keeps the shared session loaded while a prediction runs.</summary>
+    private readonly struct SessionLease : IDisposable
+    {
+        private SessionLease(InferenceSession session) => Session = session;
+
+        public InferenceSession Session { get; }
+
+        public static SessionLease Acquire()
+        {
+            lock (SessionLock)
+            {
+                _session ??= CreateSession();
+                _sessionUsers++;
+                return new SessionLease(_session);
+            }
+        }
+
+        public void Dispose()
+        {
+            lock (SessionLock)
+            {
+                _sessionUsers--;
+            }
+        }
     }
 
     private static InferenceSession CreateSession()

@@ -1,31 +1,33 @@
 using System.Windows.Input;
-using System.Windows.Interop;
+using System.Windows.Threading;
 using FileOrbit.App.Interop;
+using Forms = System.Windows.Forms;
 
 namespace FileOrbit.App.Shell;
 
-/// <summary>A system-wide keyboard shortcut registered with RegisterHotKey on a message-only window.</summary>
+/// <summary>
+/// A system-wide keyboard shortcut registered with RegisterHotKey on a message-only window. The window is
+/// a plain Win32 one rather than a WPF HwndSource, so idling in the tray never starts WPF's renderer (and
+/// the graphics driver stack it loads).
+/// </summary>
 public sealed class GlobalHotkey : IDisposable
 {
-    private const int HotkeyId = 0x4F52; // "OR"
-    private readonly HwndSource _window;
+    internal const int HotkeyId = 0x4F52; // "OR"
+    private readonly MessageWindow _window;
     private bool _registered;
 
     public GlobalHotkey()
     {
-        _window = new HwndSource(new HwndSourceParameters("FileOrbitHotkey")
-        {
-            Width = 0,
-            Height = 0,
-            ParentWindow = new IntPtr(-3), // HWND_MESSAGE
-            WindowStyle = 0,
-        });
-        _window.AddHook(WndProc);
+        var dispatcher = Dispatcher.CurrentDispatcher;
+        // Raised through the dispatcher so handler exceptions reach the app's usual error handling.
+        _window = new MessageWindow(() => dispatcher.BeginInvoke(() => Pressed?.Invoke(this, EventArgs.Empty)));
     }
 
     public event EventHandler? Pressed;
 
     public string? Current { get; private set; }
+
+    internal IntPtr Handle => _window.Handle;
 
     /// <summary>Registers the shortcut, replacing any previous one. Returns false if it is invalid or taken.</summary>
     public bool TryRegister(string? gesture, out string? error)
@@ -121,17 +123,28 @@ public sealed class GlobalHotkey : IDisposable
     public void Dispose()
     {
         Unregister();
-        _window.Dispose();
+        _window.DestroyHandle();
     }
 
-    private IntPtr WndProc(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam, ref bool handled)
+    private sealed class MessageWindow : Forms.NativeWindow
     {
-        if (message == NativeMethods.WmHotkey && wParam.ToInt32() == HotkeyId)
+        private readonly Action _pressed;
+
+        public MessageWindow(Action pressed)
         {
-            handled = true;
-            Pressed?.Invoke(this, EventArgs.Empty);
+            _pressed = pressed;
+            CreateHandle(new Forms.CreateParams { Caption = "FileOrbitHotkey", Parent = new IntPtr(-3) }); // HWND_MESSAGE
         }
 
-        return IntPtr.Zero;
+        protected override void WndProc(ref Forms.Message m)
+        {
+            if (m.Msg == NativeMethods.WmHotkey && m.WParam.ToInt32() == HotkeyId)
+            {
+                _pressed();
+                return;
+            }
+
+            base.WndProc(ref m);
+        }
     }
 }

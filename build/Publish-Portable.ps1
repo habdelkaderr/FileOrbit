@@ -19,8 +19,11 @@ $zip = Join-Path $root "artifacts\$name.zip"
 foreach ($path in $output, $zip) { if (Test-Path $path) { Remove-Item $path -Recurse -Force } }
 
 $project = Join-Path $root 'src\FileOrbit.App\FileOrbit.App.csproj'
+# No compression inside the single-file exe: a compressed bundle is unpacked into private memory at every
+# start (~90 MB more RAM for as long as FileOrbit runs), while an uncompressed one is read straight from
+# the file. The zip and the MSI are compressed anyway, so downloads stay about the same size.
 dotnet publish $project -c $Configuration -r win-x64 --self-contained true `
-    -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true `
+    -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=false `
     -p:DebugType=none -p:DebugSymbols=false -o $output
 if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed ($LASTEXITCODE)" }
 

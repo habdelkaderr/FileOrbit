@@ -30,6 +30,7 @@ public partial class App
     private MainWindow? _main;
     private TrayIcon? _tray;
     private GlobalHotkey? _hotkey;
+    private readonly IdleTrimmer _trimmer;
 
     public App(InstanceChannel instance, CommandLine initialCommand)
     {
@@ -38,7 +39,10 @@ public partial class App
         // Explorer starts one FileOrbit process per selected file; group arrivals into one batch.
         _batchTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(350) };
         _batchTimer.Tick += (_, _) => FlushPendingPaths();
+        _trimmer = new IdleTrimmer(TimeSpan.FromSeconds(20), IsIdle);
     }
+
+    private bool IsIdle() => Windows.Count == 0 && !Services.Queue.HasActiveJobs && _pendingPaths.Count == 0;
 
     public static new App Current => (App)Application.Current;
 
@@ -75,10 +79,16 @@ public partial class App
             EnsureShellIntegration();
         }
 
-        Services.Queue.JobFinished += (_, job) => Dispatcher.BeginInvoke(() => OnJobFinished(job));
+        Services.Queue.JobFinished += (_, job) => Dispatcher.BeginInvoke(() =>
+        {
+            OnJobFinished(job);
+            _trimmer.Schedule();
+        });
 
         _instance.StartServer(command => Dispatcher.BeginInvoke(() => Handle(command)));
         Handle(_initialCommand);
+        // Start-up work (detecting engines, loading settings) leaves garbage behind; release it once settled.
+        _trimmer.Schedule();
         if (fromRemovableDrive && _initialCommand.Mode != LaunchMode.Background)
         {
             Dispatcher.BeginInvoke(OfferInstallFromRemovableDrive, DispatcherPriority.ApplicationIdle);
@@ -379,6 +389,12 @@ public partial class App
     /// <summary>Without the tray icon, FileOrbit exits once no window is open and no conversion is running.</summary>
     private void ExitIfIdle()
     {
+        if (Services.Settings.RunInTray && IsIdle())
+        {
+            _trimmer.Schedule();
+            return;
+        }
+
         if (Services.Settings.RunInTray || Windows.Count > 0 || Services.Queue.HasActiveJobs || _pendingPaths.Count > 0)
         {
             if (!Services.Settings.RunInTray && Windows.Count == 0 && Services.Queue.HasActiveJobs)

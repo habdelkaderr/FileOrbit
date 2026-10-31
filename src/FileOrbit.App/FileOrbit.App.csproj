@@ -12,6 +12,8 @@
     <StartupObject>FileOrbit.App.Program</StartupObject>
     <NoWarn>$(NoWarn);WPF0001;WFO0003</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Mostly idle tray app with a small heap: no background GC thread needed. -->
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\FileOrbit.Core\FileOrbit.Core.csproj" />

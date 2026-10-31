@@ -143,4 +143,25 @@ public sealed partial class ShellIntegrationTests
 
     [LibraryImport("kernel32.dll")]
     private static partial IntPtr LocalFree(IntPtr memory);
+
+    [Fact]
+    public void Hotkey_message_window_raises_Pressed()
+    {
+        var pressed = 0;
+        WpfHost.Run(_ =>
+        {
+            using var hotkey = new GlobalHotkey();
+            hotkey.Pressed += (_, _) => pressed++;
+            Assert.True(PostMessage(hotkey.Handle, 0x0312 /* WM_HOTKEY */, GlobalHotkey.HotkeyId, 0));
+            Assert.True(PostMessage(hotkey.Handle, 0x0312, GlobalHotkey.HotkeyId + 1, 0)); // someone else's id: ignored
+            WpfHost.Pump(TimeSpan.FromSeconds(2), () => pressed > 0);
+            WpfHost.Pump(TimeSpan.FromMilliseconds(100));
+        });
+
+        Assert.Equal(1, pressed);
+    }
+
+    [LibraryImport("user32.dll", EntryPoint = "PostMessageW")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool PostMessage(IntPtr hwnd, int message, nint wParam, nint lParam);
 }
