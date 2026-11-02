@@ -56,7 +56,7 @@ public static partial class SkiaImaging
             var scale = targetWidth is > 0 ? targetWidth.Value / bounds.Width : 1f;
             var width = Math.Max(1, (int)Math.Round(bounds.Width * scale));
             var height = Math.Max(1, (int)Math.Round(bounds.Height * scale));
-            if ((long)width * height > WindowsImaging.MaxPixels)
+            if ((long)width * height > ImageCodecs.MaxPixels)
             {
                 throw new ConversionException("The requested SVG output size is too large.");
             }

@@ -35,9 +35,7 @@ public sealed class ImageEditEngine : ConversionEngineBase
     protected override EngineStatus CheckStatus() => EngineStatus.Available("Ready (built in)");
 
     public override CapabilityStatus GetCapabilityStatus(ConversionCapability capability) =>
-        capability.SourceFormatId is "heic" or "avif" or "webp" && !WindowsImaging.CanDecode("." + capability.SourceFormatId)
-            ? CapabilityStatus.Missing($"Reading {capability.SourceFormatId.ToUpperInvariant()} needs the matching image extension from the Microsoft Store.")
-            : CapabilityStatus.Ok;
+        ImageEngine.DecodeStatus(capability.SourceFormatId) ?? ImageEngine.EncodeStatus(capability.TargetFormatId) ?? CapabilityStatus.Ok;
 
     protected override IEnumerable<ConversionCapability> DeclareCapabilities()
     {
@@ -75,7 +73,7 @@ public sealed class ImageEditEngine : ConversionEngineBase
         var options = context.Options;
         var metadataMode = ImageEngine.MetadataModeFrom(options);
         context.Report(0.05, "Reading image");
-        var image = await WindowsImaging.DecodeAsync(context.Input.Path, null, metadataMode != MetadataMode.Remove, cancellationToken);
+        var image = await ImageCodecs.DecodeAsync(context.Input.Path, null, metadataMode != MetadataMode.Remove, cancellationToken);
         if (image.SourceFrameCount > 1)
         {
             context.AddWarning($"The source has {image.SourceFrameCount} frames or pages; only the first was edited.");

@@ -320,8 +320,8 @@
       "FileOrbit": {
         "type": "Project",
         "dependencies": {
-          "FileOrbit.Core": "[0.1.0, )",
-          "FileOrbit.Engines": "[0.1.0, )"
+          "FileOrbit.Core": "[0.2.0, )",
+          "FileOrbit.Engines": "[0.2.0, )"
         }
       },
       "fileorbit.core": {
@@ -332,7 +332,7 @@
         "dependencies": {
           "ClosedXML": "[0.105.1, )",
           "DocumentFormat.OpenXml": "[3.5.1, )",
-          "FileOrbit.Core": "[0.1.0, )",
+          "FileOrbit.Core": "[0.2.0, )",
           "Markdig": "[1.4.1, )",
           "Microsoft.ML.OnnxRuntime": "[1.31.0, )",
           "PdfPig": "[0.1.16, )",

@@ -3,7 +3,9 @@ using FileOrbit.Engines.Archives;
 using FileOrbit.Engines.Data;
 using FileOrbit.Engines.Images;
 using FileOrbit.Engines.Media;
+#if WINDOWS
 using FileOrbit.Engines.Ocr;
+#endif
 using FileOrbit.Engines.Office;
 using FileOrbit.Engines.Pdf;
 using FileOrbit.Engines.Processes;
@@ -39,17 +41,21 @@ public static class EngineCatalog
             new ImageEngine(),
             new ImageEditEngine(),
             new BackgroundRemovalEngine(),
-            new WindowsPdfEngine(),
             new PdfTextEngine(),
             new TabularEngine(),
             new TextEngine(),
             new DocxTextEngine(),
             new ManagedArchiveEngine(),
+#if WINDOWS
+            new WindowsPdfEngine(),
             new MediaFoundationEngine(),
             new WindowsOcrEngine(),
+#endif
 
             // Detected: used only when the user has installed them.
+#if WINDOWS
             new OfficeEngine(),
+#endif
             new LibreOfficeEngine(locator),
             new FfmpegEngine(locator),
             new SevenZipEngine(locator),

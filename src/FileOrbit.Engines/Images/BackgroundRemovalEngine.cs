@@ -44,9 +44,7 @@ public sealed class BackgroundRemovalEngine : ConversionEngineBase
             return status.ToCapabilityStatus();
         }
 
-        return capability.SourceFormatId is "heic" or "avif" or "webp" && !WindowsImaging.CanDecode("." + capability.SourceFormatId)
-            ? CapabilityStatus.Missing($"Reading {capability.SourceFormatId.ToUpperInvariant()} needs the matching image extension from the Microsoft Store.")
-            : CapabilityStatus.Ok;
+        return ImageEngine.DecodeStatus(capability.SourceFormatId) ?? CapabilityStatus.Ok;
     }
 
     protected override IEnumerable<ConversionCapability> DeclareCapabilities()
@@ -75,7 +73,7 @@ public sealed class BackgroundRemovalEngine : ConversionEngineBase
     public override async Task ConvertAsync(ConversionContext context, CancellationToken cancellationToken)
     {
         context.Report(0.05, "Reading image");
-        var image = await WindowsImaging.DecodeAsync(context.Input.Path, MaxWorkingDimension, readMetadata: false, cancellationToken);
+        var image = await ImageCodecs.DecodeAsync(context.Input.Path, MaxWorkingDimension, readMetadata: false, cancellationToken);
 
         context.Report(0.2, "Finding the subject");
         var mask = await Task.Run(() => PredictMask(image, context.Options.Get("edges", "soft") == "sharp"), cancellationToken);

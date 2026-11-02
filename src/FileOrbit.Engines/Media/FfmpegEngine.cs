@@ -229,7 +229,7 @@ public sealed partial class FfmpegEngine : ConversionEngineBase
 
     private static OptionDescriptor[] VideoOptions(string source, string target)
     {
-        var options = new List<OptionDescriptor> { MediaFoundationEngine.ResolutionOption, MediaFoundationEngine.VideoQualityOption };
+        var options = new List<OptionDescriptor> { MediaOptions.ResolutionOption, MediaOptions.VideoQualityOption };
         if (target is "mp4" or "mkv" or "mov" && source is "mp4" or "mkv" or "mov")
         {
             options.Add(OptionDescriptor.Toggle("copy", "Copy streams without re-encoding", false,

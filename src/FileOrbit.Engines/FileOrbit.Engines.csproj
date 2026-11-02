@@ -1,11 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>$(WindowsTargetFramework)</TargetFramework>
-    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <!-- Windows build for the WPF app; plain net10.0 build for macOS (Windows-only engines left out). -->
+    <TargetFrameworks>$(WindowsTargetFramework);net10.0</TargetFrameworks>
     <RootNamespace>FileOrbit.Engines</RootNamespace>
-    <UseWPF>true</UseWPF>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(WindowsTargetFramework)'">
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != '$(WindowsTargetFramework)'">
+    <!-- Built on Windows components (Office COM, WinRT PDF/OCR/imaging, Media Foundation, Job Objects). -->
+    <Compile Remove="Office/OfficeEngine.cs;Office/StaWorker.cs;Office/OfficeProcessGuard.cs;Office/WordPdfPromptSuppressor.cs" />
+    <Compile Remove="Pdf/WindowsPdfEngine.cs;Media/MediaFoundationEngine.cs;Ocr/WindowsOcrEngine.cs" />
+    <Compile Remove="Images/WindowsImaging.cs;Processes/ChildProcessJob.cs" />
+  </ItemGroup>
   <ItemGroup>
     <!-- U2-Net-P salient-object model (Apache-2.0, 4.6 MB) for background removal; embedded so it works offline. -->
     <EmbeddedResource Include="Models/u2netp.onnx" LogicalName="FileOrbit.Models.u2netp.onnx" />

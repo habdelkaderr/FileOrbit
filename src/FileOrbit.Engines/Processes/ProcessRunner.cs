@@ -97,7 +97,10 @@ public static class ProcessRunner
             throw new ConversionException($"Could not start {Path.GetFileName(executable)}.", ex.Message, ex);
         }
 
+#if WINDOWS
+        // Children die with FileOrbit even if it crashes. Elsewhere, cancellation kills the process tree.
         ChildProcessJob.Instance.TryAssign(process);
+#endif
         process.StandardInput.Close(); // Tools must never wait for interactive input.
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();

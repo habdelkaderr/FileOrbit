@@ -1,8 +1,5 @@
-using System.Runtime.InteropServices.WindowsRuntime;
 using FileOrbit.Core.Capabilities;
 using FileOrbit.Core.Formats;
-using Windows.Graphics.Imaging;
-using Windows.Storage.Streams;
 
 namespace FileOrbit.Engines.Images;
 
@@ -26,7 +23,7 @@ public sealed class ImageEngine : ConversionEngineBase
 
     protected override EngineStatus CheckStatus()
     {
-        var extensions = WindowsImaging.SupportedDecoderExtensions;
+        var extensions = ImageCodecs.SupportedDecoderExtensions;
         var optional = new List<string>();
         if (extensions.Contains(".heic")) optional.Add("HEIC");
         if (extensions.Contains(".webp")) optional.Add("WebP");
@@ -43,17 +40,39 @@ public sealed class ImageEngine : ConversionEngineBase
             return status.ToCapabilityStatus();
         }
 
-        return capability.SourceFormatId switch
-        {
-            "heic" when !WindowsImaging.CanDecode(".heic") =>
-                CapabilityStatus.Missing("Reading HEIC needs the free 'HEIF Image Extensions' (and 'HEVC Video Extensions') from the Microsoft Store."),
-            "avif" when !WindowsImaging.CanDecode(".avif") =>
-                CapabilityStatus.Missing("Reading AVIF needs the free 'AV1 Video Extension' from the Microsoft Store."),
-            "webp" when !WindowsImaging.CanDecode(".webp") =>
-                CapabilityStatus.Missing("Reading WebP needs the free 'WebP Image Extensions' from the Microsoft Store."),
-            _ => CapabilityStatus.Ok,
-        };
+        return DecodeStatus(capability.SourceFormatId) ?? EncodeStatus(capability.TargetFormatId) ?? CapabilityStatus.Ok;
     }
+
+    /// <summary>Why an image format cannot be read on this computer, or null when it can.</summary>
+    internal static CapabilityStatus? DecodeStatus(string formatId) => formatId switch
+    {
+#if WINDOWS
+        "heic" when !ImageCodecs.CanDecode(".heic") =>
+            CapabilityStatus.Missing("Reading HEIC needs the free 'HEIF Image Extensions' (and 'HEVC Video Extensions') from the Microsoft Store."),
+        "avif" when !ImageCodecs.CanDecode(".avif") =>
+            CapabilityStatus.Missing("Reading AVIF needs the free 'AV1 Video Extension' from the Microsoft Store."),
+        "webp" when !ImageCodecs.CanDecode(".webp") =>
+            CapabilityStatus.Missing("Reading WebP needs the free 'WebP Image Extensions' from the Microsoft Store."),
+#else
+        "svg" => null,
+        _ when !ImageCodecs.CanDecode("." + FileExtensionFor(formatId)) =>
+            CapabilityStatus.Missing($"This computer cannot read {formatId.ToUpperInvariant()} images."),
+#endif
+        _ => null,
+    };
+
+    /// <summary>Why an image format cannot be written on this computer, or null when it can.</summary>
+    internal static CapabilityStatus? EncodeStatus(string formatId) =>
+        OperatingSystem.IsWindows() || formatId is "webp" or "pdf" or "ico" || ImageCodecs.CanEncode(formatId)
+            ? null
+            : CapabilityStatus.Missing($"This computer cannot write {formatId.ToUpperInvariant()} images.");
+
+    private static string FileExtensionFor(string formatId) => formatId switch
+    {
+        "jpeg" => "jpg",
+        "tiff" => "tif",
+        _ => formatId,
+    };
 
     protected override IEnumerable<ConversionCapability> DeclareCapabilities()
     {
@@ -94,7 +113,7 @@ public sealed class ImageEngine : ConversionEngineBase
 
         var image = source == "svg"
             ? await Task.Run(() => SkiaImaging.RenderSvg(context.Input.Path, ParseMaxSize(options.Get("svgWidth", "1024"))), cancellationToken)
-            : await WindowsImaging.DecodeAsync(context.Input.Path, maxSize, metadataMode != MetadataMode.Remove, cancellationToken);
+            : await ImageCodecs.DecodeAsync(context.Input.Path, maxSize, metadataMode != MetadataMode.Remove, cancellationToken);
 
         if (image.SourceFrameCount > 1)
         {
@@ -144,7 +163,7 @@ public sealed class ImageEngine : ConversionEngineBase
                     context.AddWarning("GIF is limited to 256 colours, so photos may show banding.");
                 }
 
-                var keptMetadata = await WindowsImaging.EncodeAsync(image, target, output, quality / 100.0, metadataMode, cancellationToken);
+                var keptMetadata = await ImageCodecs.EncodeAsync(image, target, output, quality / 100.0, metadataMode, cancellationToken);
                 if (!keptMetadata && image.Metadata.Count > 0)
                 {
                     context.AddWarning($"Photo metadata could not be stored in {context.Target.Name}.");
@@ -169,26 +188,10 @@ public sealed class ImageEngine : ConversionEngineBase
         foreach (var size in sizes)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            entries.Add((size, await EncodePngBytesAsync(square, size, cancellationToken)));
+            entries.Add((size, await ImageCodecs.EncodePngBytesAsync(square, size, cancellationToken)));
         }
 
         IcoWriter.Write(output, entries);
-    }
-
-    private static async Task<byte[]> EncodePngBytesAsync(RasterImage image, int size, CancellationToken cancellationToken)
-    {
-        using var memory = new InMemoryRandomAccessStream();
-        var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, memory).AsTask(cancellationToken);
-        encoder.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied, (uint)image.Width, (uint)image.Height, 96, 96, image.Pixels);
-        encoder.BitmapTransform.ScaledWidth = (uint)size;
-        encoder.BitmapTransform.ScaledHeight = (uint)size;
-        encoder.BitmapTransform.InterpolationMode = BitmapInterpolationMode.Fant;
-        await encoder.FlushAsync().AsTask(cancellationToken);
-
-        var bytes = new byte[memory.Size];
-        memory.Seek(0);
-        await memory.ReadAsync(bytes.AsBuffer(), (uint)bytes.Length, InputStreamOptions.None).AsTask(cancellationToken);
-        return bytes;
     }
 
     private static Fidelity FidelityFor(string source, string target) => target switch

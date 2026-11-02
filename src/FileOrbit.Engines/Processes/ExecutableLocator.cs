@@ -1,7 +1,7 @@
 namespace FileOrbit.Engines.Processes;
 
 /// <summary>
-/// Finds external tools. Only absolute paths to existing .exe files are ever returned; the search
+/// Finds external tools. Only absolute paths to existing executables (.exe files on Windows) are ever returned; the search
 /// never includes the current directory, so a planted executable next to an input file is not used.
 /// </summary>
 public sealed class ExecutableLocator
@@ -68,8 +68,10 @@ public sealed class ExecutableLocator
     public static bool IsValidExecutable(string? path) =>
         !string.IsNullOrWhiteSpace(path)
         && Path.IsPathFullyQualified(path)
-        && string.Equals(Path.GetExtension(path), ".exe", StringComparison.OrdinalIgnoreCase)
-        && File.Exists(path);
+        && File.Exists(path)
+        && (OperatingSystem.IsWindows()
+            ? string.Equals(Path.GetExtension(path), ".exe", StringComparison.OrdinalIgnoreCase)
+            : (File.GetUnixFileMode(path) & UnixFileMode.UserExecute) != 0);
 
     /// <summary>Expands a single "*" directory segment, e.g. "C:\Tools\ffmpeg-*\bin\ffmpeg.exe".</summary>
     private static IEnumerable<string> ExpandWildcard(string pattern)

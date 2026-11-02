@@ -12,7 +12,7 @@ namespace FileOrbit.Engines.Images;
 public static class WindowsImaging
 {
     /// <summary>Refuse images that would need more than ~1.6 GB of pixel memory.</summary>
-    public const long MaxPixels = 400_000_000;
+    public const long MaxPixels = ImageCodecs.MaxPixels;
 
     private static readonly string[] MetadataProperties =
     [
@@ -184,15 +184,24 @@ public static class WindowsImaging
         return metadataWritten;
     }
 
-    public static (uint Width, uint Height) FitWithin(uint width, uint height, int? maxDimension)
-    {
-        if (maxDimension is not > 0 || (width <= maxDimension && height <= maxDimension))
-        {
-            return (width, height);
-        }
+    public static (uint Width, uint Height) FitWithin(uint width, uint height, int? maxDimension) =>
+        ImageCodecs.FitWithin(width, height, maxDimension);
 
-        var scale = (double)maxDimension.Value / Math.Max(width, height);
-        return ((uint)Math.Max(1, Math.Round(width * scale)), (uint)Math.Max(1, Math.Round(height * scale)));
+    /// <summary>Encodes a <paramref name="size"/>×<paramref name="size"/> PNG in memory (for icon files).</summary>
+    public static async Task<byte[]> EncodePngBytesAsync(RasterImage image, int size, CancellationToken cancellationToken)
+    {
+        using var memory = new InMemoryRandomAccessStream();
+        var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, memory).AsTask(cancellationToken);
+        encoder.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied, (uint)image.Width, (uint)image.Height, 96, 96, image.Pixels);
+        encoder.BitmapTransform.ScaledWidth = (uint)size;
+        encoder.BitmapTransform.ScaledHeight = (uint)size;
+        encoder.BitmapTransform.InterpolationMode = BitmapInterpolationMode.Fant;
+        await encoder.FlushAsync().AsTask(cancellationToken);
+
+        var bytes = new byte[memory.Size];
+        memory.Seek(0);
+        await memory.ReadAsync(bytes.AsBuffer(), (uint)bytes.Length, InputStreamOptions.None).AsTask(cancellationToken);
+        return bytes;
     }
 
     private static async Task<Dictionary<string, object>> ReadMetadataAsync(BitmapDecoder decoder)
@@ -280,11 +289,4 @@ public static class WindowsImaging
 
         return set;
     }
-}
-
-public enum MetadataMode
-{
-    Keep,
-    KeepWithoutLocation,
-    Remove,
 }
