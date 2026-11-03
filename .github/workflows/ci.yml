@@ -50,7 +50,7 @@ jobs:
           dotnet test --no-build -c Release -- --filter-class FileOrbit.Tests.Visual.UiSnapshotTests
 
       - name: Upload UI snapshots
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ui-snapshots
           path: artifacts/ui-snapshots
